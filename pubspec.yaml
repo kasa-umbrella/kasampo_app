@@ -18,6 +18,7 @@ dependencies:
   firebase_auth: ^5.1.0
   cloud_firestore: ^5.4.0
   firebase_storage: ^12.1.0
+  firebase_app_check: ^0.3.1
   google_sign_in: ^6.2.1
 
   # 状態管理・ルーティング

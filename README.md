@@ -83,6 +83,64 @@ lib/
 - **Firestore直接接続**: 現状は Firebase SDK を直接使用。Security Rules で認証・アクセス制御を担保
 - **クロスfeature共有モデル**: `core/models/` に集約し、feature 間の依存を排除
 
+## セットアップ
+
+### 必要なツール
+
+- Flutter SDK
+- Firebase CLI（`npm install -g firebase-tools`）
+- FlutterFire CLI（`dart pub global activate flutterfire_cli`）
+
+### 初回セットアップ
+
+```bash
+# 依存パッケージのインストール
+flutter pub get
+
+# Firebase プロジェクトの設定ファイルを生成
+# ※ google-services.json / GoogleService-Info.plist / firebase_options.dart は .gitignore されているため要実行
+flutterfire configure
+
+# Firebase CLI にログイン
+firebase login
+```
+
+## Firebase デプロイ
+
+### Security Rules のデプロイ
+
+Firestore と Storage のセキュリティルールをクラウドに反映する。
+ルールを変更したら必ずデプロイすること。
+
+```bash
+# Firestore のルールをデプロイ
+firebase deploy --only firestore:rules
+
+# Firebase Storage を有効化したら storage.rules も追加してデプロイ
+# firebase.json の storage セクションを復活させてから実行
+# firebase deploy --only storage
+```
+
+### Firebase App Check の有効化（本番リリース前）
+
+App Check は「正規のアプリからのリクエストのみ通す」仕組み。
+コードは既に対応済みのため、Firebase Console での設定が必要。
+
+1. [Firebase Console](https://console.firebase.google.com) → プロジェクト選択
+2. 左メニュー「App Check」→「アプリを登録」
+3. Android：**Play Integrity** を選択
+4. iOS：**App Attest** を選択
+5. Cloud Firestore・Firebase Storage・Firebase Auth の App Check 適用を有効化
+
+**開発中のデバッグトークン登録**
+
+`kDebugMode` のときはデバッグプロバイダーが使われる。
+初回実行時にコンソールに出力されるトークンを Console に登録すること。
+
+1. アプリを実行して Xcode / Android Studio のログを確認
+2. `AppCheckDebugProviderFactory: ...` のトークンをコピー
+3. Firebase Console → App Check → 対象アプリ → 「デバッグトークンを管理」→ 追加
+
 ## 仕様書
 
 詳細仕様は [docs/spec.md](docs/spec.md) を参照。  

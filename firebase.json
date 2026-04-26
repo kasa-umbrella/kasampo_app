@@ -1,41 +1,6 @@
 {
-    "flutter": {
-        "platforms": {
-            "android": {
-                "default": {
-                    "projectId": "kasampo-67a68",
-                    "appId": "1:867989386071:android:b55b233d666a063904c412",
-                    "fileOutput": "android/app/google-services.json"
-                }
-            },
-            "ios": {
-                "default": {
-                    "projectId": "kasampo-67a68",
-                    "appId": "1:867989386071:ios:d7c4f312328e20a404c412",
-                    "uploadDebugSymbols": false,
-                    "fileOutput": "ios/Runner/GoogleService-Info.plist"
-                }
-            },
-            "macos": {
-                "default": {
-                    "projectId": "kasampo-67a68",
-                    "appId": "1:867989386071:ios:d7c4f312328e20a404c412",
-                    "uploadDebugSymbols": false,
-                    "fileOutput": "macos/Runner/GoogleService-Info.plist"
-                }
-            },
-            "dart": {
-                "lib/firebase_options.dart": {
-                    "projectId": "kasampo-67a68",
-                    "configurations": {
-                        "android": "1:867989386071:android:b55b233d666a063904c412",
-                        "ios": "1:867989386071:ios:d7c4f312328e20a404c412",
-                        "macos": "1:867989386071:ios:d7c4f312328e20a404c412",
-                        "web": "1:867989386071:web:1aa359693ab163d704c412",
-                        "windows": "1:867989386071:web:531aac178d108ba604c412"
-                    }
-                }
-            }
-        }
+    "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
     }
 }
