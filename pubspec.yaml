@@ -28,6 +28,7 @@ dependencies:
   # GPS・地図
   geolocator: ^13.0.1
   flutter_map: ^7.0.2
+  latlong2: ^0.9.1
 
   # 写真
   image_picker: ^1.1.2

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/splash_screen.dart';
+import 'features/map/presentation/map_screen.dart';
 
 // Phase 1 で auth 状態を見た redirect ロジックを追加する
 final _router = GoRouter(
@@ -19,9 +20,7 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const Scaffold(
-        body: Center(child: Text('メイン画面 (Phase 2 で実装)')),
-      ),
+      builder: (context, state) => const MapScreen(),
     ),
   ],
 );
