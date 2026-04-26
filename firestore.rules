@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // users/{userId}
+    // 読み取り：認証済みユーザー全員（プロフィール表示のため）
+    // 書き込み：本人のみ。userId フィールドは変更不可
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    // walkSessions/{sessionId}
+    // 読み取り：本人 or isPublic == true のセッション
+    // 書き込み：本人のみ。userId フィールドは作成後変更不可
+    match /walkSessions/{sessionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.isPublic == true
+      );
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // spots/{spotId}
+    // 読み取り：本人 or 親 walkSession が isPublic == true
+    // 書き込み：本人のみ。userId・sessionId は作成後変更不可
+    match /spots/{spotId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/walkSessions/$(resource.data.sessionId)).data.isPublic == true
+      );
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId) &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.sessionId == resource.data.sessionId;
+      allow delete: if isOwner(resource.data.userId);
+    }
+  }
+}
