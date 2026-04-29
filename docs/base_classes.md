@@ -307,7 +307,7 @@ final sessionListProvider = AsyncNotifierProvider<SessionListNotifier, List<Walk
 
 | 項目 | 方針 |
 |------|------|
-| モデルの不変性 | `copyWith` を持つ immutable クラス。`freezed` 導入も検討 |
+| モデルの不変性 | `copyWith` を持つ immutable クラス。`freezed` を使用する |
 | エラーハンドリング | Repository / Service は例外をそのまま投げる。Provider 層でキャッチして UI に伝える |
 | Firestore 直接参照 | Repository 以外では `FirebaseFirestore.instance` を呼ばない |
-| テスト | Repository はインターフェース化して mock 差し替えを可能にする（将来対応） |
+| テスト | Phase 1 から対応。Repository はインターフェース化して mock 差し替えを可能にし、主要ロジックには単体テストを書く |

@@ -7,6 +7,8 @@ class AppTheme {
   static ThemeData get light => ThemeData(
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
       surface: AppColors.surface,
     ),
     scaffoldBackgroundColor: AppColors.background,

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../app.dart';
 import '../../../core/constants/app_colors.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // 最低表示時間が経過したらルーターに通知する（ナビゲーション自体はルーターが行う）
     Future.delayed(const Duration(milliseconds: 1800), () {
-      if (mounted) context.go('/home');
+      if (mounted) ref.read(splashReadyProvider.notifier).state = true;
     });
   }
 
