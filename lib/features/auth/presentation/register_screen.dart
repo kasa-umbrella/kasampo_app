@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_providers.dart';
 import '../../../core/models/user_auth_state.dart';
+import '../../../core/widgets/indicators/loading_indicator.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -35,8 +36,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        ref.watch(registerControllerProvider).isLoading;
+    final isLoading = ref.watch(registerControllerProvider).isLoading;
 
     return Scaffold(
       appBar: AppBar(title: const Text('アカウント登録')),
@@ -71,11 +71,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               FilledButton(
                 onPressed: isLoading ? null : _submit,
                 child: isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const LoadingIndicator()
                     : const Text('登録する'),
               ),
             ],
