@@ -7,7 +7,7 @@ import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/presentation/sign_in_screen.dart';
 import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/providers/auth_providers.dart';
-import 'features/map/presentation/map_screen.dart';
+import 'features/home/presentation/main_screen.dart';
 
 // スプラッシュの最低表示時間（1.8秒）が経過したかどうか
 final splashReadyProvider = StateProvider<bool>((ref) => false);
@@ -46,7 +46,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
-      GoRoute(path: '/home', builder: (_, _) => const MapScreen()),
+      GoRoute(path: '/home', builder: (_, _) => const MainScreen()),
     ],
   );
 });
