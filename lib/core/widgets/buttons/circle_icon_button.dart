@@ -24,6 +24,8 @@ class CircleIconButton extends StatelessWidget {
       shadowColor: Colors.black26,
       child: InkWell(
         customBorder: const CircleBorder(),
+        splashColor: AppColors.splashWhite,
+        highlightColor: AppColors.highlightWhite,
         onTap: onPressed,
         child: SizedBox(
           width: size,
