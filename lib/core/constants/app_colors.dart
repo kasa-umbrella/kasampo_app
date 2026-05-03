@@ -13,5 +13,7 @@ class AppColors {
   static const divider = Color(0xFFE0E0E0);
   static const settingGray = Color(0xFF9E9E9E);
   static const shadow = Color(0x1A000000);
+  static const splashWhite = Color(0x40FFFFFF);
+  static const highlightWhite = Color(0x1AFFFFFF);
   static const error = Color(0xFFE53935);
 }
