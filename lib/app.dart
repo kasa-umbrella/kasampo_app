@@ -8,9 +8,18 @@ import 'features/auth/presentation/sign_in_screen.dart';
 import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'features/home/presentation/main_screen.dart';
+import 'features/walk/presentation/result/walk_result_screen.dart';
+import 'features/walk/presentation/spot/spot_record_screen.dart';
 
-// スプラッシュの最低表示時間（1.8秒）が経過したかどうか
-final splashReadyProvider = StateProvider<bool>((ref) => false);
+class _SplashReadyNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setReady() => state = true;
+}
+
+final splashReadyProvider =
+    NotifierProvider<_SplashReadyNotifier, bool>(_SplashReadyNotifier.new);
 
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(Ref ref) {
@@ -29,10 +38,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authValue = ref.read(userAuthStateProvider);
       final loc = state.matchedLocation;
 
-      // スプラッシュ表示中 or auth 確認中はスプラッシュに留まる
       if (loc == '/' && (!splashReady || authValue.isLoading)) return null;
 
-      final userState = authValue.valueOrNull ?? const UserAuthLoading();
+      final userState = authValue.value ?? const UserAuthLoading();
 
       return switch (userState) {
         UserAuthLoading() => null,
@@ -47,6 +55,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(path: '/home', builder: (_, _) => const MainScreen()),
+      GoRoute(path: '/session/spot', builder: (_, _) => const SpotRecordScreen()),
+      GoRoute(
+        path: '/result',
+        builder: (_, state) => WalkResultScreen(
+          data: state.extra as WalkResultData,
+        ),
+      ),
     ],
   );
 });

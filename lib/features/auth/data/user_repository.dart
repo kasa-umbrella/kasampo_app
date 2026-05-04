@@ -5,7 +5,7 @@ import '../../../core/models/app_user.dart';
 part 'user_repository.g.dart';
 
 @riverpod
-UserRepository userRepository(UserRepositoryRef ref) => UserRepository();
+UserRepository userRepository(Ref ref) => UserRepository();
 
 class UserRepository {
   final _db = FirebaseFirestore.instance;

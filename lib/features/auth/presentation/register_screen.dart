@@ -24,7 +24,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authState = ref.read(userAuthStateProvider).valueOrNull;
+    final authState = ref.read(userAuthStateProvider).value;
     if (authState is! UserAuthUnregistered) return;
 
     await ref.read(registerControllerProvider.notifier).register(

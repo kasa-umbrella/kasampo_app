@@ -7,12 +7,12 @@ import '../data/user_repository.dart';
 part 'auth_providers.g.dart';
 
 @riverpod
-Stream<User?> authState(AuthStateRef ref) =>
+Stream<User?> authState(Ref ref) =>
     ref.watch(authRepositoryProvider).authStateChanges();
 
 // Firebase Auth の状態変化に連動して Firestore のユーザー存在を確認するストリーム
 @riverpod
-Stream<UserAuthState> userAuthState(UserAuthStateRef ref) async* {
+Stream<UserAuthState> userAuthState(Ref ref) async* {
   yield const UserAuthLoading();
 
   final authStream = ref.watch(authRepositoryProvider).authStateChanges();

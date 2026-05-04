@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimens.dart';
 import '../../../core/widgets/buttons/circle_icon_button.dart';
 import '../../../core/widgets/navigation/bottom_nav_item.dart';
 import '../../map/presentation/map_screen.dart';
+import '../../walk/providers/walk_session_notifier.dart';
+import 'widgets/walk_session_overlay.dart';
+import 'widgets/walk_start_bottom_sheet.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSessionActive = ref.watch(
+      walkSessionProvider.select((s) => s.isActive),
+    );
     return Scaffold(
       body: Stack(
         children: [
@@ -18,7 +25,7 @@ class MainScreen extends StatelessWidget {
             child: Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: CircleIconButton(
                   icon: Icons.settings,
                   size: AppDimens.circleButtonSize,
@@ -28,6 +35,11 @@ class MainScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (isSessionActive)
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: WalkSessionOverlay(),
+            ),
         ],
       ),
       bottomNavigationBar: DecoratedBox(
@@ -65,11 +77,13 @@ class MainScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: CircleIconButton(
-        icon: Icons.add,
-        size: AppDimens.circleButtonSize,
-        onPressed: () {},
-      ),
+      floatingActionButton: isSessionActive
+          ? null
+          : CircleIconButton(
+              icon: Icons.add,
+              size: AppDimens.circleButtonSize,
+              onPressed: () => WalkStartBottomSheet.show(context),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
