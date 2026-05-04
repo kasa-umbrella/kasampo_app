@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
 import '../indicators/loading_indicator.dart';
 
 enum AppButtonVariant { primary, outlined }
@@ -43,6 +44,8 @@ class AppButton extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             minimumSize: _minSize,
             shape: _shape,
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
           ),
           child: _child,
         ),

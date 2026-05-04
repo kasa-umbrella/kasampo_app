@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -49,9 +50,9 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     final now = DateTime.now();
     final initialPoint = GeoPoint(initialPosition.latitude, initialPosition.longitude);
-    final sessionId = await ref
-        .read(walkSessionRepositoryProvider)
-        .create(uid, now);
+    final repo = ref.read(walkSessionRepositoryProvider);
+    final sessionId = await repo.create(uid, now);
+    await repo.appendRoutePoint(sessionId, initialPoint);
 
     if (!ref.mounted) return false;
 
@@ -79,8 +80,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     }
 
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
-    final repo = ref.read(walkSessionRepositoryProvider);
-    await repo.appendRoutePoint(sessionId, newPoint);
+    try {
+      await ref.read(walkSessionRepositoryProvider).appendRoutePoint(sessionId, newPoint);
+    } catch (e) {
+      debugPrint('[WalkSession] appendRoutePoint failed: $e');
+    }
 
     if (!ref.mounted) return;
 
