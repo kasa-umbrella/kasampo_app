@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/snack_bar_helper.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/sheets/app_bottom_sheet.dart';
 import '../../../walk/presentation/result/walk_result_screen.dart';
 import '../../../walk/providers/walk_session_notifier.dart';
 
@@ -94,6 +96,34 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
               const SizedBox(width: 8),
               _StopButton(
                 onPressed: () async {
+                  final confirmed = await AppBottomSheet.show<bool>(
+                    context,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          '散歩を終了しますか？',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        AppButton(
+                          label: '終了する',
+                          onPressed: () => Navigator.of(context).pop(true),
+                          variant: AppButtonVariant.danger,
+                        ),
+                        const SizedBox(height: 8),
+                        AppButton(
+                          label: 'キャンセル',
+                          onPressed: () => Navigator.of(context).pop(false),
+                          variant: AppButtonVariant.outlined,
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true || !context.mounted) return;
                   final current = ref.read(walkSessionProvider);
                   final resultData = WalkResultData(
                     routePoints: current.routePoints,
@@ -128,10 +158,7 @@ class _InfoItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 2),
         Text(

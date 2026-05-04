@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import '../utils/app_logger.dart';
 
 class LocationService {
   static const _distanceFilter = 5;
@@ -20,11 +21,17 @@ class LocationService {
 
   Future<Position?> getCurrentPosition() async {
     try {
-      return await Geolocator.getCurrentPosition(
+      final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
       ).timeout(const Duration(seconds: 10));
+      appLogger.d(
+        '[Location] getCurrentPosition: '
+        'lat=${pos.latitude}, lng=${pos.longitude}, '
+        'accuracy=${pos.accuracy.toStringAsFixed(1)}m',
+      );
+      return pos;
     } catch (_) {
       return null;
     }
@@ -36,7 +43,15 @@ class LocationService {
         accuracy: LocationAccuracy.high,
         distanceFilter: _distanceFilter,
       ),
-    );
+    ).map((pos) {
+      appLogger.d(
+        '[Location] watchPosition: '
+        'lat=${pos.latitude}, lng=${pos.longitude}, '
+        'accuracy=${pos.accuracy.toStringAsFixed(1)}m, '
+        'speed=${pos.speed.toStringAsFixed(1)}m/s',
+      );
+      return pos;
+    });
     return _positionStream!;
   }
 

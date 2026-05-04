@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:geolocator/geolocator.dart';
@@ -73,9 +73,10 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     if (sessionId == null) return;
 
     if (!pos.latitude.isFinite || !pos.longitude.isFinite) {
+      appLogger.w('[WalkSession] 無効なGPS座標を受信、セッションを中断: lat=${pos.latitude}, lng=${pos.longitude}');
       _positionSub?.cancel();
       _positionSub = null;
-      state = state.copyWith(isActive: false, error: 'GPS座標が無効です');
+      state = const WalkSessionState();
       return;
     }
 
@@ -83,7 +84,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     try {
       await ref.read(walkSessionRepositoryProvider).appendRoutePoint(sessionId, newPoint);
     } catch (e) {
-      debugPrint('[WalkSession] appendRoutePoint failed: $e');
+      appLogger.w('[WalkSession] appendRoutePoint failed: $e');
     }
 
     if (!ref.mounted) return;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../indicators/loading_indicator.dart';
 
-enum AppButtonVariant { primary, outlined }
+enum AppButtonVariant { primary, outlined, danger }
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -46,6 +46,15 @@ class AppButton extends StatelessWidget {
             shape: _shape,
             foregroundColor: AppColors.primary,
             side: const BorderSide(color: AppColors.primary),
+          ),
+          child: _child,
+        ),
+      AppButtonVariant.danger => FilledButton(
+          onPressed: _onPressed,
+          style: FilledButton.styleFrom(
+            minimumSize: _minSize,
+            shape: _shape,
+            backgroundColor: AppColors.error,
           ),
           child: _child,
         ),

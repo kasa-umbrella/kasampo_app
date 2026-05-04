@@ -107,7 +107,7 @@ class Spot {
 
 ```dart
 abstract class IWalkSessionRepository {
-  Future<String> create(WalkSession session);
+  Future<String> create(String userId, DateTime startedAt);
   Future<void> appendRoutePoint(String sessionId, GeoPoint point);
   Future<void> finish(String sessionId, {
     required DateTime endedAt,

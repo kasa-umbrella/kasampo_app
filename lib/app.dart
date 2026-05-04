@@ -58,6 +58,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/session/spot', builder: (_, _) => const SpotRecordScreen()),
       GoRoute(
         path: '/result',
+        redirect: (_, state) =>
+            state.extra is WalkResultData ? null : '/home',
         builder: (_, state) => WalkResultScreen(
           data: state.extra as WalkResultData,
         ),
