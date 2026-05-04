@@ -16,7 +16,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
     // 最低表示時間が経過したらルーターに通知する（ナビゲーション自体はルーターが行う）
     Future.delayed(const Duration(milliseconds: 1800), () {
-      if (mounted) ref.read(splashReadyProvider.notifier).state = true;
+      if (mounted) ref.read(splashReadyProvider.notifier).setReady();
     });
   }
 

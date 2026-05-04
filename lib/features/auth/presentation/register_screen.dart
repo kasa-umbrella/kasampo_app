@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_providers.dart';
 import '../../../core/models/user_auth_state.dart';
-import '../../../core/widgets/indicators/loading_indicator.dart';
+import '../../../core/widgets/buttons/app_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -24,7 +24,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authState = ref.read(userAuthStateProvider).valueOrNull;
+    final authState = ref.read(userAuthStateProvider).asData?.value;
     if (authState is! UserAuthUnregistered) return;
 
     await ref.read(registerControllerProvider.notifier).register(
@@ -68,11 +68,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: isLoading ? null : _submit,
-                child: isLoading
-                    ? const LoadingIndicator()
-                    : const Text('登録する'),
+              AppButton(
+                label: '登録する',
+                onPressed: _submit,
+                isLoading: isLoading,
               ),
             ],
           ),
