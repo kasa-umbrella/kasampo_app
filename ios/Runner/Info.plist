@@ -68,6 +68,12 @@
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 	<string>散歩中のGPS記録に使用します</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>バックグラウンドでも散歩ルートを記録するために使用します</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>散歩中のスポット写真撮影に使用します</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/app_config.dart';
+import '../../../core/services/walk_foreground_service.dart';
 import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -25,6 +27,8 @@ abstract class WalkSessionState with _$WalkSessionState {
 
 @Riverpod(keepAlive: true)
 class WalkSessionNotifier extends _$WalkSessionNotifier {
+  final List<GeoPoint> _buffer = [];
+
   @override
   WalkSessionState build() {
     ref.listen(currentPositionProvider, (_, next) {
@@ -48,7 +52,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final initialPoint = GeoPoint(initialPosition.latitude, initialPosition.longitude);
     final repo = ref.read(walkSessionRepositoryProvider);
     final sessionId = await repo.create(uid, now);
-    await repo.appendRoutePoint(sessionId, initialPoint);
+    await repo.appendRoutePoints(sessionId, [initialPoint]);
+
+    if (!ref.mounted) return false;
+
+    await WalkForegroundService.start();
 
     if (!ref.mounted) return false;
 
@@ -74,10 +82,15 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     }
 
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
-    try {
-      await ref.read(walkSessionRepositoryProvider).appendRoutePoint(sessionId, newPoint);
-    } catch (e) {
-      appLogger.w('[WalkSession] appendRoutePoint failed: $e');
+    _buffer.add(newPoint);
+    if (_buffer.length >= AppConfig.routePointBufferSize) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      _buffer.clear();
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints failed: $e');
+      }
     }
 
     if (!ref.mounted) return;
@@ -129,6 +142,16 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final startedAt = state.startedAt;
     if (sessionId == null || startedAt == null) return;
 
+    if (_buffer.isNotEmpty) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      _buffer.clear();
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints flush failed: $e');
+      }
+    }
+
     final now = DateTime.now();
     await ref.read(walkSessionRepositoryProvider).finish(
           sessionId,
@@ -136,6 +159,8 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
           distanceMeters: state.distanceMeters.isFinite ? state.distanceMeters : 0.0,
           durationSeconds: now.difference(startedAt).inSeconds,
         );
+
+    await WalkForegroundService.stop();
 
     if (!ref.mounted) return;
     state = const WalkSessionState();
