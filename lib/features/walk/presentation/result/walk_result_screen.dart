@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/map/app_tile_layer.dart';
 
 class WalkResultData {
@@ -126,27 +127,9 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: () => context.go('/home'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.onPrimary,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            '完了',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                      AppButton(
+                        label: '完了',
+                        onPressed: () => context.go('/home'),
                       ),
                     ],
                   ),

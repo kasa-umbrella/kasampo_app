@@ -11,7 +11,7 @@
 
 | 機能 | 内容 |
 |------|------|
-| セッション開始 | メイン画面の+ボタン → 開始ボタン → セッション中画面へ遷移 |
+| セッション開始 | メイン画面の+ボタン → 開始ボタン → メイン画面にオーバーレイ表示 |
 | GPS記録 | 5秒間隔でGeoPointを取得・`routePoints`に追記 |
 | 経過時間・距離表示 | セッション中画面でリアルタイム更新 |
 | スポット追加 | カメラ起動 → 写真 + 説明入力 → Firestore保存 |
@@ -50,10 +50,16 @@ lib/
         │   ├── walk_session_notifier.dart # セッション状態管理
         │   └── walk_session_notifier.g.dart
         └── presentation/
-            ├── session/
-            │   └── walk_session_screen.dart   # セッション中画面
+            ├── result/
+            │   └── walk_result_screen.dart    # 結果画面
             └── spot/
                 └── spot_record_screen.dart    # スポット記録画面
+
+    └── home/
+        └── presentation/
+            └── widgets/
+                ├── walk_session_overlay.dart  # セッション中オーバーレイ（MainScreen上に表示）
+                └── walk_start_bottom_sheet.dart  # セッション開始ボタンシート
 ```
 
 ---
@@ -215,15 +221,19 @@ class WalkSessionState {
 
 ### Step 6 — UI
 
-#### セッション中画面（`walk_session_screen.dart`）
+#### セッション中オーバーレイ（`walk_session_overlay.dart`）
+
+専用画面へは遷移せず、`MainScreen` の `Stack` 上にオーバーレイとして表示する。
+`walkSessionProvider` を watch し、`isActive == true` のときのみ表示される。
 
 | 要素 | 実装 |
 |------|------|
-| 地図（現在地追従） | `flutter_map` + `WalkSessionState.routePoints` をポリラインで描画 |
 | 経過時間 | `Timer.periodic(1s)` でカウントアップ表示 |
 | 移動距離 | `WalkSessionState.distanceMeters` を `ref.watch` |
-| スポットボタン | カメラアイコン → `SpotRecordScreen` へ遷移 |
-| 終了ボタン | 確認ダイアログ → `notifier.finish()` → メイン画面へ |
+| スポットボタン | カメラアイコン → `context.go('/session/spot')` |
+| 終了ボタン | 確認ダイアログ → `notifier.finish()` → `context.go('/result')` |
+
+地図は `MainScreen` に常駐する `MapScreen` がそのまま使われ、GPS更新のたびに現在地へカメラ追従する。
 
 #### スポット記録画面（`spot_record_screen.dart`）
 
@@ -232,48 +242,54 @@ class WalkSessionState {
 | 写真選択 | `image_picker` でカメラ or カメラロール |
 | 写真プレビュー | 選択後に画面内表示 |
 | 説明入力 | `TextField` |
-| 保存ボタン | `notifier.addSpot()` → セッション中画面へ戻る |
-| キャンセル | セッション中画面へ戻る |
+| 保存ボタン | `notifier.addSpot()` → `context.go('/home')` |
+| キャンセル | `context.go('/home')` |
 
 ---
 
-### Step 7 — ルーティング追加
+### Step 7 — ルーティング
 
-`app.dart` の `GoRouter` に以下を追加：
+セッション中は専用ルートへ遷移せず、`/home` にとどまりオーバーレイを表示する。
+`app.dart` の `GoRouter` に定義するルートは以下：
 
 ```dart
-GoRoute(path: '/session', builder: (_, __) => const WalkSessionScreen()),
+GoRoute(path: '/home', builder: (_, __) => const MainScreen()),
 GoRoute(path: '/session/spot', builder: (_, __) => const SpotRecordScreen()),
+GoRoute(path: '/result', builder: (_, state) => WalkResultScreen(data: state.extra as WalkResultData)),
 ```
 
-`WalkStartBottomSheet` の開始ボタンから `context.go('/session')` で遷移。
+`WalkStartBottomSheet` の開始ボタンは `notifier.start()` を呼ぶのみで画面遷移しない。
+`isActive` を watch した `MainScreen` が自動的にオーバーレイを表示する。
 
 ---
 
 ## データフロー
 
 ```
-+ボタン
++ボタン（MainScreen）
   └─ WalkStartBottomSheet「開始」
        └─ WalkSessionNotifier.start()
             ├─ Firestore: walkSessions ドキュメント作成
-            └─ LocationService.watchPosition() 開始
-                  └─ (5秒ごと) _onPositionUpdate()
-                        ├─ Firestore: routePoints に追記
-                        └─ State: distanceMeters を加算
+            ├─ LocationService.watchPosition() 開始
+            │     └─ (5mごと) _onPositionUpdate()
+            │           ├─ Firestore: routePoints に追記
+            │           └─ State: distanceMeters を加算
+            └─ isActive = true → MainScreen が WalkSessionOverlay を表示
 
-カメラボタン
-  └─ SpotRecordScreen
+カメラボタン（WalkSessionOverlay）
+  └─ context.go('/session/spot') → SpotRecordScreen
        └─ WalkSessionNotifier.addSpot()
             ├─ FirebaseStorageService.uploadPhoto()
             └─ Firestore: spots ドキュメント作成
+       └─ 保存/キャンセル → context.go('/home')
 
-終了ボタン
+終了ボタン（WalkSessionOverlay）
   └─ 確認ダイアログ
        └─ WalkSessionNotifier.finish()
             ├─ Firestore: walkSessions を更新（endedAt / distance / duration）
             ├─ LocationService watchPosition キャンセル
-            └─ メイン画面へ遷移
+            ├─ State クリア（isActive = false）
+            └─ context.go('/result') → WalkResultScreen
 ```
 
 ---

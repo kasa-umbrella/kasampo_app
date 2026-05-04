@@ -86,6 +86,12 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
                 ),
               ),
               const Spacer(),
+              IconButton(
+                onPressed: () => context.go('/session/spot'),
+                icon: const Icon(Icons.camera_alt_outlined),
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
               _StopButton(
                 onPressed: () async {
                   final current = ref.read(walkSessionProvider);

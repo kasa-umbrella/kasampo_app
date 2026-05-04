@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/walk_session_notifier.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 
 class SpotRecordScreen extends ConsumerStatefulWidget {
   const SpotRecordScreen({super.key});
@@ -35,7 +36,7 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
           photo: _photo!,
           description: _descriptionController.text.trim(),
         );
-    if (mounted) context.go('/session');
+    if (mounted) context.go('/home');
   }
 
   @override
@@ -67,18 +68,18 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.go('/session'),
-                    child: const Text('キャンセル'),
+                  child: AppButton(
+                    label: 'キャンセル',
+                    onPressed: () => context.go('/home'),
+                    variant: AppButtonVariant.outlined,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: _photo != null && !_isSaving ? _save : null,
-                    child: _isSaving
-                        ? const CircularProgressIndicator()
-                        : const Text('保存'),
+                  child: AppButton(
+                    label: '保存',
+                    onPressed: _photo != null ? _save : null,
+                    isLoading: _isSaving,
                   ),
                 ),
               ],

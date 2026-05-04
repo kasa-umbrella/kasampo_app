@@ -40,7 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (loc == '/' && (!splashReady || authValue.isLoading)) return null;
 
-      final userState = authValue.value ?? const UserAuthLoading();
+      final userState = authValue.asData?.value ?? const UserAuthLoading();
 
       return switch (userState) {
         UserAuthLoading() => null,
