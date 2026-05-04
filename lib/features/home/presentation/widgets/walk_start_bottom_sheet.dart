@@ -10,10 +10,7 @@ class WalkStartBottomSheet extends ConsumerWidget {
   const WalkStartBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) {
-    return AppBottomSheet.show(
-      context,
-      child: const WalkStartBottomSheet(),
-    );
+    return AppBottomSheet.show(context, child: const WalkStartBottomSheet());
   }
 
   @override
@@ -22,7 +19,7 @@ class WalkStartBottomSheet extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
-          '散歩を始める',
+          'さあ、夢の世界で散歩しよう。',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

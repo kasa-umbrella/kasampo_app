@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/services/firebase_storage_service.dart';
 import '../../../core/services/i_storage_service.dart';
@@ -11,6 +12,11 @@ part 'walk_providers.g.dart';
 
 @riverpod
 LocationService locationService(Ref ref) => LocationService();
+
+@riverpod
+Stream<Position> currentPosition(Ref ref) {
+  return ref.watch(locationServiceProvider).watchPosition();
+}
 
 @riverpod
 IWalkSessionRepository walkSessionRepository(Ref ref) =>

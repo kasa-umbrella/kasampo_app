@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/utils/app_logger.dart';
@@ -26,13 +25,10 @@ abstract class WalkSessionState with _$WalkSessionState {
 
 @Riverpod(keepAlive: true)
 class WalkSessionNotifier extends _$WalkSessionNotifier {
-  StreamSubscription<Position>? _positionSub;
-
   @override
   WalkSessionState build() {
-    ref.onDispose(() {
-      _positionSub?.cancel();
-      _positionSub = null;
+    ref.listen(currentPositionProvider, (_, next) {
+      next.whenData(_onPositionUpdate);
     });
     return const WalkSessionState();
   }
@@ -63,19 +59,16 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       routePoints: [initialPoint],
     );
 
-    _positionSub = locationService.watchPosition().listen(_onPositionUpdate);
     return true;
   }
 
   Future<void> _onPositionUpdate(Position pos) async {
-    if (!ref.mounted) return;
+    if (!ref.mounted || !state.isActive) return;
     final sessionId = state.sessionId;
     if (sessionId == null) return;
 
     if (!pos.latitude.isFinite || !pos.longitude.isFinite) {
       appLogger.w('[WalkSession] 無効なGPS座標を受信、セッションを中断: lat=${pos.latitude}, lng=${pos.longitude}');
-      _positionSub?.cancel();
-      _positionSub = null;
       state = const WalkSessionState();
       return;
     }
@@ -135,9 +128,6 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final sessionId = state.sessionId;
     final startedAt = state.startedAt;
     if (sessionId == null || startedAt == null) return;
-
-    _positionSub?.cancel();
-    _positionSub = null;
 
     final now = DateTime.now();
     await ref.read(walkSessionRepositoryProvider).finish(
