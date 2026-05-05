@@ -35,7 +35,33 @@ class WalkStartBottomSheet extends ConsumerWidget {
             Navigator.of(context).pop();
             final ok = await ref.read(walkSessionProvider.notifier).start();
             if (!ok && context.mounted) {
-              showErrorSnackBar(context, 'GPS情報を取得できませんでした');
+              final error = ref.read(walkSessionProvider).error;
+              if (error == AppConfig.backgroundPermissionError) {
+                showDialog<void>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('位置情報の許可が必要です'),
+                    content: const Text(
+                      'バックグラウンドでの散歩記録には、位置情報の許可を「常に許可」に変更してください。',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          Geolocator.openAppSettings();
+                        },
+                        child: const Text('設定を開く'),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                showErrorSnackBar(context, 'GPS情報を取得できませんでした');
+              }
             }
           },
         ),
