@@ -21,6 +21,8 @@ abstract class WalkSessionState with _$WalkSessionState {
     @Default([]) List<GeoPoint> routePoints,
     @Default(0.0) double distanceMeters,
     @Default(false) bool isActive,
+    @Default(false) bool isPaused,
+    @Default(0) int pausedDurationSeconds,
     String? error,
   }) = _WalkSessionState;
 }
@@ -28,6 +30,7 @@ abstract class WalkSessionState with _$WalkSessionState {
 @Riverpod(keepAlive: true)
 class WalkSessionNotifier extends _$WalkSessionNotifier {
   final List<GeoPoint> _buffer = [];
+  DateTime? _pausedAt;
 
   @override
   WalkSessionState build() {
@@ -70,8 +73,36 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     return true;
   }
 
+  Future<void> pause() async {
+    if (!state.isActive || state.isPaused) return;
+    final sessionId = state.sessionId;
+    if (sessionId != null && _buffer.isNotEmpty) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      _buffer.clear();
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints pause flush failed: $e');
+      }
+    }
+    _pausedAt = DateTime.now();
+    if (!ref.mounted) return;
+    state = state.copyWith(isPaused: true);
+  }
+
+  void resume() {
+    if (!state.isPaused) return;
+    final paused = _pausedAt;
+    _pausedAt = null;
+    final added = paused != null ? DateTime.now().difference(paused).inSeconds : 0;
+    state = state.copyWith(
+      isPaused: false,
+      pausedDurationSeconds: state.pausedDurationSeconds + added,
+    );
+  }
+
   Future<void> _onPositionUpdate(Position pos) async {
-    if (!ref.mounted || !state.isActive) return;
+    if (!ref.mounted || !state.isActive || state.isPaused) return;
     final sessionId = state.sessionId;
     if (sessionId == null) return;
 
@@ -162,7 +193,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
           sessionId,
           endedAt: now,
           distanceMeters: state.distanceMeters.isFinite ? state.distanceMeters : 0.0,
-          durationSeconds: now.difference(startedAt).inSeconds,
+          durationSeconds: now.difference(startedAt).inSeconds - state.pausedDurationSeconds,
         );
 
     await WalkForegroundService.stop();

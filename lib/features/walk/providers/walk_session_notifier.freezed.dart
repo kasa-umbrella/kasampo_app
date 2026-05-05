@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WalkSessionState {
 
- String? get sessionId; DateTime? get startedAt; List<GeoPoint> get routePoints; double get distanceMeters; bool get isActive; String? get error;
+ String? get sessionId; DateTime? get startedAt; List<GeoPoint> get routePoints; double get distanceMeters; bool get isActive; bool get isPaused; int get pausedDurationSeconds; String? get error;
 /// Create a copy of WalkSessionState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $WalkSessionStateCopyWith<WalkSessionState> get copyWith => _$WalkSessionStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WalkSessionState&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&const DeepCollectionEquality().equals(other.routePoints, routePoints)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WalkSessionState&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&const DeepCollectionEquality().equals(other.routePoints, routePoints)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isPaused, isPaused) || other.isPaused == isPaused)&&(identical(other.pausedDurationSeconds, pausedDurationSeconds) || other.pausedDurationSeconds == pausedDurationSeconds)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(routePoints),distanceMeters,isActive,error);
+int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(routePoints),distanceMeters,isActive,isPaused,pausedDurationSeconds,error);
 
 @override
 String toString() {
-  return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, error: $error)';
+  return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, isPaused: $isPaused, pausedDurationSeconds: $pausedDurationSeconds, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $WalkSessionStateCopyWith<$Res>  {
   factory $WalkSessionStateCopyWith(WalkSessionState value, $Res Function(WalkSessionState) _then) = _$WalkSessionStateCopyWithImpl;
 @useResult
 $Res call({
- String? sessionId, DateTime? startedAt, List<GeoPoint> routePoints, double distanceMeters, bool isActive, String? error
+ String? sessionId, DateTime? startedAt, List<GeoPoint> routePoints, double distanceMeters, bool isActive, bool isPaused, int pausedDurationSeconds, String? error
 });
 
 
@@ -62,14 +62,16 @@ class _$WalkSessionStateCopyWithImpl<$Res>
 
 /// Create a copy of WalkSessionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = freezed,Object? startedAt = freezed,Object? routePoints = null,Object? distanceMeters = null,Object? isActive = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = freezed,Object? startedAt = freezed,Object? routePoints = null,Object? distanceMeters = null,Object? isActive = null,Object? isPaused = null,Object? pausedDurationSeconds = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String?,startedAt: freezed == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,routePoints: null == routePoints ? _self.routePoints : routePoints // ignore: cast_nullable_to_non_nullable
 as List<GeoPoint>,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as double,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
-as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as bool,isPaused: null == isPaused ? _self.isPaused : isPaused // ignore: cast_nullable_to_non_nullable
+as bool,pausedDurationSeconds: null == pausedDurationSeconds ? _self.pausedDurationSeconds : pausedDurationSeconds // ignore: cast_nullable_to_non_nullable
+as int,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  bool isPaused,  int pausedDurationSeconds,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WalkSessionState() when $default != null:
-return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.error);case _:
+return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.isPaused,_that.pausedDurationSeconds,_that.error);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distance
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  bool isPaused,  int pausedDurationSeconds,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _WalkSessionState():
-return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.error);case _:
+return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.isPaused,_that.pausedDurationSeconds,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distance
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? sessionId,  DateTime? startedAt,  List<GeoPoint> routePoints,  double distanceMeters,  bool isActive,  bool isPaused,  int pausedDurationSeconds,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _WalkSessionState() when $default != null:
-return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.error);case _:
+return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distanceMeters,_that.isActive,_that.isPaused,_that.pausedDurationSeconds,_that.error);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distance
 
 
 class _WalkSessionState implements WalkSessionState {
-  const _WalkSessionState({this.sessionId, this.startedAt, final  List<GeoPoint> routePoints = const [], this.distanceMeters = 0.0, this.isActive = false, this.error}): _routePoints = routePoints;
+  const _WalkSessionState({this.sessionId, this.startedAt, final  List<GeoPoint> routePoints = const [], this.distanceMeters = 0.0, this.isActive = false, this.isPaused = false, this.pausedDurationSeconds = 0, this.error}): _routePoints = routePoints;
   
 
 @override final  String? sessionId;
@@ -225,6 +227,8 @@ class _WalkSessionState implements WalkSessionState {
 
 @override@JsonKey() final  double distanceMeters;
 @override@JsonKey() final  bool isActive;
+@override@JsonKey() final  bool isPaused;
+@override@JsonKey() final  int pausedDurationSeconds;
 @override final  String? error;
 
 /// Create a copy of WalkSessionState
@@ -237,16 +241,16 @@ _$WalkSessionStateCopyWith<_WalkSessionState> get copyWith => __$WalkSessionStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WalkSessionState&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&const DeepCollectionEquality().equals(other._routePoints, _routePoints)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WalkSessionState&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&const DeepCollectionEquality().equals(other._routePoints, _routePoints)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isPaused, isPaused) || other.isPaused == isPaused)&&(identical(other.pausedDurationSeconds, pausedDurationSeconds) || other.pausedDurationSeconds == pausedDurationSeconds)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(_routePoints),distanceMeters,isActive,error);
+int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(_routePoints),distanceMeters,isActive,isPaused,pausedDurationSeconds,error);
 
 @override
 String toString() {
-  return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, error: $error)';
+  return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, isPaused: $isPaused, pausedDurationSeconds: $pausedDurationSeconds, error: $error)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$WalkSessionStateCopyWith<$Res> implements $WalkSessionSta
   factory _$WalkSessionStateCopyWith(_WalkSessionState value, $Res Function(_WalkSessionState) _then) = __$WalkSessionStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? sessionId, DateTime? startedAt, List<GeoPoint> routePoints, double distanceMeters, bool isActive, String? error
+ String? sessionId, DateTime? startedAt, List<GeoPoint> routePoints, double distanceMeters, bool isActive, bool isPaused, int pausedDurationSeconds, String? error
 });
 
 
@@ -274,14 +278,16 @@ class __$WalkSessionStateCopyWithImpl<$Res>
 
 /// Create a copy of WalkSessionState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = freezed,Object? startedAt = freezed,Object? routePoints = null,Object? distanceMeters = null,Object? isActive = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = freezed,Object? startedAt = freezed,Object? routePoints = null,Object? distanceMeters = null,Object? isActive = null,Object? isPaused = null,Object? pausedDurationSeconds = null,Object? error = freezed,}) {
   return _then(_WalkSessionState(
 sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String?,startedAt: freezed == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,routePoints: null == routePoints ? _self._routePoints : routePoints // ignore: cast_nullable_to_non_nullable
 as List<GeoPoint>,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as double,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
-as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as bool,isPaused: null == isPaused ? _self.isPaused : isPaused // ignore: cast_nullable_to_non_nullable
+as bool,pausedDurationSeconds: null == pausedDurationSeconds ? _self.pausedDurationSeconds : pausedDurationSeconds // ignore: cast_nullable_to_non_nullable
+as int,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
