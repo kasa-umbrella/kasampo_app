@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_config.dart';
 import '../../../core/utils/snack_bar_helper.dart';
 import '../../../core/widgets/map/app_tile_layer.dart';
 import 'package:geolocator/geolocator.dart';
@@ -66,6 +67,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           (pos != null && (!pos.latitude.isFinite || !pos.longitude.isFinite));
       if (isInvalid && context.mounted) {
         showErrorSnackBar(context, '現在地を取得できませんでした');
+      }
+      if (AppConfig.showLocationDebug && pos != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            'lat: ${pos.latitude.toStringAsFixed(6)}, '
+            'lng: ${pos.longitude.toStringAsFixed(6)}, '
+            '±${pos.accuracy.toStringAsFixed(1)}m',
+          ),
+          duration: const Duration(seconds: 2),
+        ));
       }
     });
 

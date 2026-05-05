@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 class WalkForegroundService {
@@ -24,11 +23,9 @@ class WalkForegroundService {
   static Future<void> start() async {
     if (await FlutterForegroundTask.isRunningService) return;
 
-    if (Platform.isAndroid) {
-      final perm = await FlutterForegroundTask.checkNotificationPermission();
-      if (perm != NotificationPermission.granted) {
-        await FlutterForegroundTask.requestNotificationPermission();
-      }
+    final perm = await FlutterForegroundTask.checkNotificationPermission();
+    if (perm != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
     }
 
     await FlutterForegroundTask.startService(

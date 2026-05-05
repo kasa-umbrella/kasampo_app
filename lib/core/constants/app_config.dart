@@ -3,4 +3,5 @@ class AppConfig {
 
   static const int routePointBufferSize = 100;
   static const double maxGpsAccuracyMeters = 20.0;
+  static const bool showLocationDebug = true;
 }
