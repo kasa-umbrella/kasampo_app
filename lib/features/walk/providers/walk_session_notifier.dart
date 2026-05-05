@@ -6,6 +6,7 @@ import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/models/spot.dart';
 import 'walk_providers.dart';
@@ -31,12 +32,10 @@ abstract class WalkSessionState with _$WalkSessionState {
 class WalkSessionNotifier extends _$WalkSessionNotifier {
   final List<GeoPoint> _buffer = [];
   DateTime? _pausedAt;
+  ProviderSubscription<AsyncValue<Position>>? _positionSubscription;
 
   @override
   WalkSessionState build() {
-    ref.listen(currentPositionProvider, (_, next) {
-      next.whenData(_onPositionUpdate);
-    });
     return const WalkSessionState();
   }
 
@@ -69,6 +68,10 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       isActive: true,
       routePoints: [initialPoint],
     );
+
+    _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
+      next.whenData(_onPositionUpdate);
+    });
 
     return true;
   }
@@ -108,6 +111,8 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     if (!pos.latitude.isFinite || !pos.longitude.isFinite) {
       appLogger.w('[WalkSession] 無効なGPS座標を受信、セッションを中断: lat=${pos.latitude}, lng=${pos.longitude}');
+      _positionSubscription?.close();
+      _positionSubscription = null;
       state = const WalkSessionState();
       return;
     }
@@ -178,11 +183,14 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final startedAt = state.startedAt;
     if (sessionId == null || startedAt == null) return;
 
+    _positionSubscription?.close();
+    _positionSubscription = null;
+
     if (_buffer.isNotEmpty) {
       final toSend = List<GeoPoint>.from(_buffer);
-      _buffer.clear();
       try {
         await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+        _buffer.clear();
       } catch (e) {
         appLogger.w('[WalkSession] appendRoutePoints flush failed: $e');
       }
