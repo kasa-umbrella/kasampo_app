@@ -81,6 +81,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       return;
     }
 
+    if (pos.accuracy > AppConfig.maxGpsAccuracyMeters) {
+      appLogger.d('[WalkSession] GPS精度不足でスキップ: accuracy=${pos.accuracy.toStringAsFixed(1)}m');
+      return;
+    }
+
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
     _buffer.add(newPoint);
     if (_buffer.length >= AppConfig.routePointBufferSize) {
