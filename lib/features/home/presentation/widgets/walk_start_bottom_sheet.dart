@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_config.dart';
 import '../../../../core/utils/snack_bar_helper.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/sheets/app_bottom_sheet.dart';
@@ -10,10 +12,7 @@ class WalkStartBottomSheet extends ConsumerWidget {
   const WalkStartBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) {
-    return AppBottomSheet.show(
-      context,
-      child: const WalkStartBottomSheet(),
-    );
+    return AppBottomSheet.show(context, child: const WalkStartBottomSheet());
   }
 
   @override
@@ -22,7 +21,7 @@ class WalkStartBottomSheet extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
-          '散歩を始める',
+          'さあ、夢の世界で散歩しよう。',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -36,7 +35,33 @@ class WalkStartBottomSheet extends ConsumerWidget {
             Navigator.of(context).pop();
             final ok = await ref.read(walkSessionProvider.notifier).start();
             if (!ok && context.mounted) {
-              showErrorSnackBar(context, 'GPS情報を取得できませんでした');
+              final error = ref.read(walkSessionProvider).error;
+              if (error == AppConfig.backgroundPermissionError) {
+                showDialog<void>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('位置情報の許可が必要です'),
+                    content: const Text(
+                      'バックグラウンドでの散歩記録には、位置情報の許可を「常に許可」に変更してください。',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          Geolocator.openAppSettings();
+                        },
+                        child: const Text('設定を開く'),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                showErrorSnackBar(context, 'GPS情報を取得できませんでした');
+              }
             }
           },
         ),

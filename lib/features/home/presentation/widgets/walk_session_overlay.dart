@@ -24,9 +24,12 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final startedAt = ref.read(walkSessionProvider).startedAt;
+      final session = ref.read(walkSessionProvider);
+      if (session.isPaused) return;
+      final startedAt = session.startedAt;
       if (startedAt != null) {
-        setState(() => _elapsed = DateTime.now().difference(startedAt));
+        setState(() => _elapsed = DateTime.now().difference(startedAt) -
+            Duration(seconds: session.pausedDurationSeconds));
       }
     });
   }
@@ -95,46 +98,61 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
               ),
               const SizedBox(width: 8),
               _StopButton(
-                onPressed: () async {
-                  final confirmed = await AppBottomSheet.show<bool>(
-                    context,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          '散歩を終了しますか？',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textPrimary,
+                label: state.isPaused ? '再開' : '終了',
+                color: state.isPaused ? AppColors.primary : AppColors.error,
+                onPressed: state.isPaused
+                    ? () => ref.read(walkSessionProvider.notifier).resume()
+                    : () async {
+                        final result = await AppBottomSheet.show<String>(
+                          context,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                '散歩を終了しますか？',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              AppButton(
+                                label: '終了する',
+                                onPressed: () => Navigator.of(context).pop('finish'),
+                                variant: AppButtonVariant.danger,
+                              ),
+                              const SizedBox(height: 8),
+                              AppButton(
+                                label: '一時停止',
+                                onPressed: () => Navigator.of(context).pop('pause'),
+                                variant: AppButtonVariant.outlined,
+                              ),
+                              const SizedBox(height: 8),
+                              AppButton(
+                                label: 'キャンセル',
+                                onPressed: () => Navigator.of(context).pop('cancel'),
+                                variant: AppButtonVariant.outlined,
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        AppButton(
-                          label: '終了する',
-                          onPressed: () => Navigator.of(context).pop(true),
-                          variant: AppButtonVariant.danger,
-                        ),
-                        const SizedBox(height: 8),
-                        AppButton(
-                          label: 'キャンセル',
-                          onPressed: () => Navigator.of(context).pop(false),
-                          variant: AppButtonVariant.outlined,
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed != true || !context.mounted) return;
-                  final current = ref.read(walkSessionProvider);
-                  final resultData = WalkResultData(
-                    routePoints: current.routePoints,
-                    distanceMeters: current.distanceMeters,
-                    durationSeconds: _elapsed.inSeconds,
-                  );
-                  await ref.read(walkSessionProvider.notifier).finish();
-                  if (context.mounted) {
-                    context.go('/result', extra: resultData);
-                  }
-                },
+                        );
+                        if (!context.mounted) return;
+                        if (result == 'pause') {
+                          await ref.read(walkSessionProvider.notifier).pause();
+                          return;
+                        }
+                        if (result != 'finish') return;
+                        final current = ref.read(walkSessionProvider);
+                        final resultData = WalkResultData(
+                          routePoints: current.routePoints,
+                          distanceMeters: current.distanceMeters,
+                          durationSeconds: _elapsed.inSeconds,
+                        );
+                        await ref.read(walkSessionProvider.notifier).finish();
+                        if (context.mounted) {
+                          context.go('/result', extra: resultData);
+                        }
+                      },
               ),
             ],
           ),
@@ -175,8 +193,14 @@ class _InfoItem extends StatelessWidget {
 }
 
 class _StopButton extends StatelessWidget {
-  const _StopButton({required this.onPressed});
+  const _StopButton({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
 
+  final String label;
+  final Color color;
   final VoidCallback onPressed;
 
   @override
@@ -186,12 +210,12 @@ class _StopButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.error,
+          color: color,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Text(
-          '終了',
-          style: TextStyle(
+        child: Text(
+          label,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,

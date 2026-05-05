@@ -16,4 +16,5 @@ class AppColors {
   static const splashWhite = Color(0x40FFFFFF);
   static const highlightWhite = Color(0x1AFFFFFF);
   static const error = Color(0xFFE53935);
+  static const locationBlue = Color(0xFF4285F4);
 }

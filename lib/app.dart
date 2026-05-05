@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/models/user_auth_state.dart';
@@ -73,11 +74,13 @@ class KasanpoApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: 'かさんぽ',
-      theme: AppTheme.light,
-      routerConfig: ref.watch(routerProvider),
-      debugShowCheckedModeBanner: false,
+    return WithForegroundTask(
+      child: MaterialApp.router(
+        title: 'かさんぽ',
+        theme: AppTheme.light,
+        routerConfig: ref.watch(routerProvider),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

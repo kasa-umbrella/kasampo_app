@@ -19,9 +19,9 @@ class FirestoreWalkSessionRepository implements IWalkSessionRepository {
   }
 
   @override
-  Future<void> appendRoutePoint(String sessionId, GeoPoint point) async {
+  Future<void> appendRoutePoints(String sessionId, List<GeoPoint> points) async {
     await _collection.doc(sessionId).update({
-      'routePoints': FieldValue.arrayUnion([point]),
+      'routePoints': FieldValue.arrayUnion(points),
     });
   }
 

@@ -51,6 +51,40 @@ final class LocationServiceProvider
 
 String _$locationServiceHash() => r'5c196f0dc11a166a14bfa4e9d1af43d8a9341442';
 
+@ProviderFor(currentPosition)
+const currentPositionProvider = CurrentPositionProvider._();
+
+final class CurrentPositionProvider
+    extends
+        $FunctionalProvider<AsyncValue<Position>, Position, Stream<Position>>
+    with $FutureModifier<Position>, $StreamProvider<Position> {
+  const CurrentPositionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentPositionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentPositionHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Position> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Position> create(Ref ref) {
+    return currentPosition(ref);
+  }
+}
+
+String _$currentPositionHash() => r'2a506cacbb3197e22c481637b9becf81b0dec1bf';
+
 @ProviderFor(walkSessionRepository)
 const walkSessionRepositoryProvider = WalkSessionRepositoryProvider._();
 

@@ -19,6 +19,10 @@ class LocationService {
         permission == LocationPermission.always;
   }
 
+  Future<bool> hasAlwaysPermission() async {
+    return (await Geolocator.checkPermission()) == LocationPermission.always;
+  }
+
   Future<Position?> getCurrentPosition() async {
     try {
       final pos = await Geolocator.getCurrentPosition(

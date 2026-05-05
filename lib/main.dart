@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
+import 'core/services/walk_foreground_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  WalkForegroundService.init();
 
   // firebase_options.dart が未生成の場合はコンソールにエラーを出して続行する
   // `flutterfire configure` を実行してから再ビルドすること

@@ -1,10 +1,13 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/app_config.dart';
+
+import '../../../core/services/walk_foreground_service.dart';
 import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/models/spot.dart';
 import 'walk_providers.dart';
@@ -20,20 +23,20 @@ abstract class WalkSessionState with _$WalkSessionState {
     @Default([]) List<GeoPoint> routePoints,
     @Default(0.0) double distanceMeters,
     @Default(false) bool isActive,
+    @Default(false) bool isPaused,
+    @Default(0) int pausedDurationSeconds,
     String? error,
   }) = _WalkSessionState;
 }
 
 @Riverpod(keepAlive: true)
 class WalkSessionNotifier extends _$WalkSessionNotifier {
-  StreamSubscription<Position>? _positionSub;
+  final List<GeoPoint> _buffer = [];
+  DateTime? _pausedAt;
+  ProviderSubscription<AsyncValue<Position>>? _positionSubscription;
 
   @override
   WalkSessionState build() {
-    ref.onDispose(() {
-      _positionSub?.cancel();
-      _positionSub = null;
-    });
     return const WalkSessionState();
   }
 
@@ -41,6 +44,12 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final locationService = ref.read(locationServiceProvider);
     final granted = await locationService.requestPermission();
     if (!ref.mounted || !granted) return false;
+
+    if (Platform.isIOS && !await locationService.hasAlwaysPermission()) {
+      if (!ref.mounted) return false;
+      state = const WalkSessionState(error: AppConfig.backgroundPermissionError);
+      return false;
+    }
 
     final initialPosition = await locationService.getCurrentPosition();
     if (!ref.mounted || initialPosition == null) return false;
@@ -52,7 +61,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final initialPoint = GeoPoint(initialPosition.latitude, initialPosition.longitude);
     final repo = ref.read(walkSessionRepositoryProvider);
     final sessionId = await repo.create(uid, now);
-    await repo.appendRoutePoint(sessionId, initialPoint);
+    await repo.appendRoutePoints(sessionId, [initialPoint]);
+
+    if (!ref.mounted) return false;
+
+    await WalkForegroundService.start();
 
     if (!ref.mounted) return false;
 
@@ -63,28 +76,69 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       routePoints: [initialPoint],
     );
 
-    _positionSub = locationService.watchPosition().listen(_onPositionUpdate);
+    _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
+      next.whenData(_onPositionUpdate);
+    });
+
     return true;
   }
 
-  Future<void> _onPositionUpdate(Position pos) async {
+  Future<void> pause() async {
+    if (!state.isActive || state.isPaused) return;
+    final sessionId = state.sessionId;
+    if (sessionId != null && _buffer.isNotEmpty) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      _buffer.clear();
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints pause flush failed: $e');
+      }
+    }
+    _pausedAt = DateTime.now();
     if (!ref.mounted) return;
+    state = state.copyWith(isPaused: true);
+  }
+
+  void resume() {
+    if (!state.isPaused) return;
+    final paused = _pausedAt;
+    _pausedAt = null;
+    final added = paused != null ? DateTime.now().difference(paused).inSeconds : 0;
+    state = state.copyWith(
+      isPaused: false,
+      pausedDurationSeconds: state.pausedDurationSeconds + added,
+    );
+  }
+
+  Future<void> _onPositionUpdate(Position pos) async {
+    if (!ref.mounted || !state.isActive || state.isPaused) return;
     final sessionId = state.sessionId;
     if (sessionId == null) return;
 
     if (!pos.latitude.isFinite || !pos.longitude.isFinite) {
       appLogger.w('[WalkSession] 無効なGPS座標を受信、セッションを中断: lat=${pos.latitude}, lng=${pos.longitude}');
-      _positionSub?.cancel();
-      _positionSub = null;
+      _positionSubscription?.close();
+      _positionSubscription = null;
       state = const WalkSessionState();
       return;
     }
 
+    if (pos.accuracy > AppConfig.maxGpsAccuracyMeters) {
+      appLogger.d('[WalkSession] GPS精度不足でスキップ: accuracy=${pos.accuracy.toStringAsFixed(1)}m');
+      return;
+    }
+
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
-    try {
-      await ref.read(walkSessionRepositoryProvider).appendRoutePoint(sessionId, newPoint);
-    } catch (e) {
-      appLogger.w('[WalkSession] appendRoutePoint failed: $e');
+    _buffer.add(newPoint);
+    if (_buffer.length >= AppConfig.routePointBufferSize) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      _buffer.clear();
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints failed: $e');
+      }
     }
 
     if (!ref.mounted) return;
@@ -136,16 +190,28 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final startedAt = state.startedAt;
     if (sessionId == null || startedAt == null) return;
 
-    _positionSub?.cancel();
-    _positionSub = null;
+    _positionSubscription?.close();
+    _positionSubscription = null;
+
+    if (_buffer.isNotEmpty) {
+      final toSend = List<GeoPoint>.from(_buffer);
+      try {
+        await ref.read(walkSessionRepositoryProvider).appendRoutePoints(sessionId, toSend);
+        _buffer.clear();
+      } catch (e) {
+        appLogger.w('[WalkSession] appendRoutePoints flush failed: $e');
+      }
+    }
 
     final now = DateTime.now();
     await ref.read(walkSessionRepositoryProvider).finish(
           sessionId,
           endedAt: now,
           distanceMeters: state.distanceMeters.isFinite ? state.distanceMeters : 0.0,
-          durationSeconds: now.difference(startedAt).inSeconds,
+          durationSeconds: now.difference(startedAt).inSeconds - state.pausedDurationSeconds,
         );
+
+    await WalkForegroundService.stop();
 
     if (!ref.mounted) return;
     state = const WalkSessionState();

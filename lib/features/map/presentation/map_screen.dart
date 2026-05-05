@@ -1,9 +1,14 @@
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_config.dart';
+import '../../../core/utils/snack_bar_helper.dart';
 import '../../../core/widgets/map/app_tile_layer.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../walk/providers/walk_providers.dart';
 import '../../walk/providers/walk_session_notifier.dart';
 
@@ -55,6 +60,34 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       },
     );
 
+    ref.listen(currentPositionProvider, (_, next) {
+      final pos = next.asData?.value;
+      final isInvalid =
+          next.hasError ||
+          (pos != null && (!pos.latitude.isFinite || !pos.longitude.isFinite));
+      if (isInvalid && context.mounted) {
+        showErrorSnackBar(context, '現在地を取得できませんでした');
+      }
+      if (AppConfig.showLocationDebug && pos != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            'lat: ${pos.latitude.toStringAsFixed(6)}, '
+            'lng: ${pos.longitude.toStringAsFixed(6)}, '
+            '±${pos.accuracy.toStringAsFixed(1)}m',
+          ),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    });
+
+    final routePoints = ref.watch(
+      walkSessionProvider.select((s) => s.routePoints),
+    );
+    final Position? currentPosition = ref
+        .watch(currentPositionProvider)
+        .asData
+        ?.value;
+
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
@@ -64,6 +97,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
       children: [
         const AppTileLayer(),
+        CircleLayer(
+          circles: routePoints
+              .map(
+                (p) => CircleMarker(
+                  point: LatLng(p.latitude, p.longitude),
+                  radius: 6,
+                  color: AppColors.primary,
+                ),
+              )
+              .toList(),
+        ),
+        if (currentPosition != null)
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: LatLng(
+                  currentPosition.latitude,
+                  currentPosition.longitude,
+                ),
+                child: Transform.rotate(
+                  angle: currentPosition.heading * math.pi / 180,
+                  child: const Icon(
+                    Icons.navigation,
+                    color: AppColors.locationBlue,
+                    size: 36,
+                  ),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
