@@ -8,6 +8,7 @@ import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/presentation/sign_in_screen.dart';
 import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/presentation/terms_screen.dart';
+import 'features/auth/presentation/terms_view_screen.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'features/home/presentation/main_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
@@ -51,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         UserAuthUnregistered() =>
           (loc == '/terms' || loc == '/register') ? null : '/terms',
         UserAuthRegistered() =>
-          (loc == '/sign-in' || loc == '/register' || loc == '/') ? '/home' : null,
+          (loc == '/sign-in' || loc == '/register' || loc == '/' || loc == '/terms') ? '/home' : null,
       };
     },
     routes: [
@@ -61,6 +62,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(path: '/home', builder: (_, _) => const MainScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(path: '/terms-view', builder: (_, _) => const TermsViewScreen()),
       GoRoute(path: '/licenses', builder: (_, _) => const LicensePage()),
       GoRoute(path: '/session/spot', builder: (_, _) => const SpotRecordScreen()),
       GoRoute(

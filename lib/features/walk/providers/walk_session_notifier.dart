@@ -42,6 +42,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
   }
 
   Future<bool> start() async {
+    state = state.copyWith(error: null);
     final locationService = ref.read(locationServiceProvider);
     final result = await locationService.requestPermission();
     if (!ref.mounted) return false;

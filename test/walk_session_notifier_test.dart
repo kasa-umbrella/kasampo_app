@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:kasampo_app/core/constants/app_config.dart';
 import 'package:kasampo_app/core/services/location_service.dart';
 import 'package:kasampo_app/features/walk/domain/repositories/i_walk_session_repository.dart';
 import 'package:kasampo_app/features/walk/providers/walk_providers.dart';
@@ -10,13 +11,16 @@ import 'package:kasampo_app/features/walk/providers/walk_session_notifier.dart';
 // --- Fakes ---
 
 class _FakeLocationService extends LocationService {
-  final bool permissionGranted;
+  final LocationPermissionResult permissionResult;
   final Position? position;
 
-  _FakeLocationService({this.permissionGranted = true, this.position});
+  _FakeLocationService({
+    this.permissionResult = LocationPermissionResult.granted,
+    this.position,
+  });
 
   @override
-  Future<bool> requestPermission() async => permissionGranted;
+  Future<LocationPermissionResult> requestPermission() async => permissionResult;
 
   @override
   Future<Position?> getCurrentPosition() async => position;
@@ -33,7 +37,7 @@ class _FakeWalkSessionRepository implements IWalkSessionRepository {
   Future<String> create(String userId, DateTime startedAt) async => 'session-1';
 
   @override
-  Future<void> appendRoutePoint(String sessionId, GeoPoint point) async {}
+  Future<void> appendRoutePoints(String sessionId, List<GeoPoint> points) async {}
 
   @override
   Future<void> finish(
@@ -45,14 +49,14 @@ class _FakeWalkSessionRepository implements IWalkSessionRepository {
 }
 
 ProviderContainer _makeContainer({
-  bool permissionGranted = true,
+  LocationPermissionResult permissionResult = LocationPermissionResult.granted,
   Position? position,
 }) =>
     ProviderContainer(
       overrides: [
         locationServiceProvider.overrideWith(
           (_) => _FakeLocationService(
-            permissionGranted: permissionGranted,
+            permissionResult: permissionResult,
             position: position,
           ),
         ),
@@ -77,13 +81,24 @@ void main() {
     });
 
     test('start() は位置情報権限が拒否された場合 false を返す', () async {
-      final container = _makeContainer(permissionGranted: false);
+      final container = _makeContainer(permissionResult: LocationPermissionResult.permissionDenied);
       addTearDown(container.dispose);
 
       final ok = await container.read(walkSessionProvider.notifier).start();
 
       expect(ok, isFalse);
       expect(container.read(walkSessionProvider).isActive, isFalse);
+    });
+
+    test('start() は位置情報サービスが無効な場合 false を返し error をセットする', () async {
+      final container = _makeContainer(permissionResult: LocationPermissionResult.serviceDisabled);
+      addTearDown(container.dispose);
+
+      final ok = await container.read(walkSessionProvider.notifier).start();
+
+      expect(ok, isFalse);
+      expect(container.read(walkSessionProvider).isActive, isFalse);
+      expect(container.read(walkSessionProvider).error, AppConfig.locationServiceDisabledError);
     });
 
     test('start() は現在地が取得できない場合 false を返す', () async {
