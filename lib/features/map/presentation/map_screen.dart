@@ -9,6 +9,7 @@ import '../../../core/constants/app_config.dart';
 import '../../../core/utils/snack_bar_helper.dart';
 import '../../../core/widgets/map/app_tile_layer.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/services/location_service.dart';
 import '../../walk/providers/walk_providers.dart';
 import '../../walk/providers/walk_session_notifier.dart';
 
@@ -30,8 +31,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> _moveToCurrentLocation() async {
     final locationService = ref.read(locationServiceProvider);
-    final granted = await locationService.requestPermission();
-    if (!granted) return;
+    final result = await locationService.requestPermission();
+    if (result != LocationPermissionResult.granted) return;
 
     final position = await locationService.getCurrentPosition();
     if (position == null || !mounted) return;
@@ -60,23 +61,28 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       },
     );
 
-    ref.listen(currentPositionProvider, (_, next) {
+    ref.listen(currentPositionProvider, (prev, next) {
       final pos = next.asData?.value;
       final isInvalid =
           next.hasError ||
           (pos != null && (!pos.latitude.isFinite || !pos.longitude.isFinite));
-      if (isInvalid && context.mounted) {
-        showErrorSnackBar(context, '現在地を取得できませんでした');
+      final prevPos = prev?.asData?.value;
+      final wasInvalid =
+          (prev?.hasError ?? false) ||
+          (prevPos != null &&
+              (!prevPos.latitude.isFinite || !prevPos.longitude.isFinite));
+      if (isInvalid && !wasInvalid && context.mounted) {
+        showSnackBar(context, '現在地を取得できませんでした');
       }
       if (AppConfig.showLocationDebug && pos != null && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            'lat: ${pos.latitude.toStringAsFixed(6)}, '
-            'lng: ${pos.longitude.toStringAsFixed(6)}, '
-            '±${pos.accuracy.toStringAsFixed(1)}m',
-          ),
+        showSnackBar(
+          context,
+          'lat: ${pos.latitude.toStringAsFixed(6)}, '
+          'lng: ${pos.longitude.toStringAsFixed(6)}, '
+          '±${pos.accuracy.toStringAsFixed(1)}m',
+          variant: SnackBarVariant.success,
           duration: const Duration(seconds: 2),
-        ));
+        );
       }
     });
 

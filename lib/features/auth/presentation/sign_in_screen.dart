@@ -14,7 +14,7 @@ class SignInScreen extends ConsumerWidget {
 
     ref.listen<AsyncValue<void>>(signInControllerProvider, (_, next) {
       if (next.hasError) {
-        showErrorSnackBar(context, next.error.toString());
+        showSnackBar(context, next.error.toString());
       }
     });
 

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_config.dart';
 
+import '../../../core/services/location_service.dart';
 import '../../../core/services/walk_foreground_service.dart';
 import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,9 +42,16 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
   }
 
   Future<bool> start() async {
+    state = state.copyWith(error: null);
     final locationService = ref.read(locationServiceProvider);
-    final granted = await locationService.requestPermission();
-    if (!ref.mounted || !granted) return false;
+    final result = await locationService.requestPermission();
+    if (!ref.mounted) return false;
+
+    if (result == LocationPermissionResult.serviceDisabled) {
+      state = const WalkSessionState(error: AppConfig.locationServiceDisabledError);
+      return false;
+    }
+    if (result != LocationPermissionResult.granted) return false;
 
     if (Platform.isIOS && !await locationService.hasAlwaysPermission()) {
       if (!ref.mounted) return false;

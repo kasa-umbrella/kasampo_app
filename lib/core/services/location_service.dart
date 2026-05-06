@@ -2,21 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import '../utils/app_logger.dart';
 
+enum LocationPermissionResult { granted, serviceDisabled, permissionDenied }
+
 class LocationService {
   static const _distanceFilter = 5;
 
   Stream<Position>? _positionStream;
 
-  Future<bool> requestPermission() async {
+  Future<LocationPermissionResult> requestPermission() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return false;
+    if (!serviceEnabled) return LocationPermissionResult.serviceDisabled;
 
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    return permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always;
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      return LocationPermissionResult.granted;
+    }
+    return LocationPermissionResult.permissionDenied;
   }
 
   Future<bool> hasAlwaysPermission() async {
