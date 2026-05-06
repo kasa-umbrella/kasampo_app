@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-
-final _packageInfoProvider = FutureProvider((_) => PackageInfo.fromPlatform());
 import '../../../core/constants/app_colors.dart';
 import '../../../core/models/user_auth_state.dart';
 import '../../../core/widgets/buttons/app_button.dart';
@@ -36,12 +33,12 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => Geolocator.openAppSettings(),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
-          AppListTile(
+          const AppListTile(
             icon: Icons.info_outline,
             title: 'アプリバージョン',
             trailing: Text(
-              ref.watch(_packageInfoProvider).asData?.value.version ?? '-',
-              style: const TextStyle(color: AppColors.textSecondary),
+              '1.0.0',
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
