@@ -27,12 +27,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const _NotificationTile(),
           const Divider(height: 1, indent: 16, endIndent: 16),
-          AppListTile(
-            icon: Icons.location_on_outlined,
-            title: '位置情報の権限確認',
-            onTap: () => Geolocator.openAppSettings(),
-          ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
           const AppListTile(
             icon: Icons.info_outline,
             title: 'アプリバージョン',
@@ -40,6 +34,12 @@ class SettingsScreen extends ConsumerWidget {
               '1.0.0',
               style: TextStyle(color: AppColors.textSecondary),
             ),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          AppListTile(
+            icon: Icons.location_on_outlined,
+            title: '位置情報の権限確認',
+            onTap: () => Geolocator.openAppSettings(),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           AppListTile(
