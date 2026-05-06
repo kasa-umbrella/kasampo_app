@@ -11,6 +11,7 @@ import 'features/auth/presentation/terms_screen.dart';
 import 'features/auth/presentation/terms_view_screen.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'features/home/presentation/main_screen.dart';
+import 'features/settings/presentation/licenses_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/walk/presentation/result/walk_result_screen.dart';
 import 'features/walk/presentation/spot/spot_record_screen.dart';
@@ -63,7 +64,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/home', builder: (_, _) => const MainScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/terms-view', builder: (_, _) => const TermsViewScreen()),
-      GoRoute(path: '/licenses', builder: (_, _) => const LicensePage()),
+      GoRoute(path: '/licenses', builder: (_, _) => const LicensesScreen()),
       GoRoute(path: '/session/spot', builder: (_, _) => const SpotRecordScreen()),
       GoRoute(
         path: '/result',
