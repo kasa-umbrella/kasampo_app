@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
 import '../indicators/loading_indicator.dart';
 
 class GoogleSignInButton extends StatelessWidget {
@@ -19,11 +20,11 @@ class GoogleSignInButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.white54),
+          side: const BorderSide(color: AppColors.onPrimary),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: Colors.white24,
+          backgroundColor: AppColors.onPrimary,
         ),
         child: isLoading
             ? const LoadingIndicator(size: 22, strokeWidth: 2.5)
@@ -37,7 +38,7 @@ class GoogleSignInButton extends StatelessWidget {
                     errorBuilder: (_, _, _) => const Icon(
                       Icons.login,
                       size: 20,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -45,7 +46,7 @@ class GoogleSignInButton extends StatelessWidget {
                     'Googleでサインイン',
                     style: TextStyle(
                       fontSize: 15,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

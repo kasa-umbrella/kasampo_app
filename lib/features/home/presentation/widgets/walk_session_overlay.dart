@@ -60,7 +60,7 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
 
     ref.listen(walkSessionProvider.select((s) => s.error), (_, error) {
       if (error != null && context.mounted) {
-        showErrorSnackBar(context, error);
+        showSnackBar(context, error);
       }
     });
 
