@@ -21,10 +21,8 @@ class UserRepository {
     required String displayName,
     String avatarUrl = '',
   }) async {
-    await _db.collection('users').doc(uid).set({
-      'displayName': displayName,
-      'avatarUrl': avatarUrl,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    await _db.collection('users').doc(uid).set(
+      AppUser.toNewUserMap(displayName: displayName, avatarUrl: avatarUrl),
+    );
   }
 }

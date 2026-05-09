@@ -28,4 +28,14 @@ class AppUser {
         'avatarUrl': avatarUrl,
         'createdAt': Timestamp.fromDate(createdAt),
       };
+
+  static Map<String, dynamic> toNewUserMap({
+    required String displayName,
+    String avatarUrl = '',
+  }) =>
+      {
+        'displayName': displayName,
+        'avatarUrl': avatarUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
 }
