@@ -216,3 +216,44 @@ final class StorageServiceProvider
 }
 
 String _$storageServiceHash() => r'98c435cd14d9434852315a98f7fb76b6111bc89d';
+
+@ProviderFor(currentUid)
+const currentUidProvider = CurrentUidProvider._();
+
+final class CurrentUidProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  const CurrentUidProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentUidProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentUidHash();
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    return currentUid(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$currentUidHash() => r'ebce6f7fb1c31e1d35ccf1a8a0615dfdd2c6c6c4';

@@ -64,7 +64,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     final initialPosition = await locationService.getCurrentPosition();
     if (!ref.mounted || initialPosition == null) return false;
 
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = ref.read(currentUidProvider);
     if (uid == null) return false;
 
     final now = DateTime.now();
@@ -88,7 +88,9 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
       next.whenData((pos) {
-        _pendingUpdate = _pendingUpdate.then((_) => _onPositionUpdate(pos));
+        _pendingUpdate = _pendingUpdate
+            .then((_) => _onPositionUpdate(pos))
+            .catchError((e) => appLogger.w('[WalkSession] position update error: $e'));
       });
     });
 
@@ -141,10 +143,6 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       return;
     }
 
-    if (kDebugMode) {
-      await WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy);
-    }
-
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
     _buffer.add(newPoint);
     if (_buffer.length >= AppConfig.routePointBufferSize) {
@@ -171,6 +169,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       routePoints: [...state.routePoints, newPoint],
       distanceMeters: state.distanceMeters + added,
     );
+
+    if (kDebugMode) {
+      WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy)
+          .ignore();
+    }
   }
 
   Future<void> addSpot({
@@ -208,6 +211,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     _positionSubscription?.close();
     _positionSubscription = null;
+    await _pendingUpdate;
     _pendingUpdate = Future.value();
 
     if (_buffer.isNotEmpty) {

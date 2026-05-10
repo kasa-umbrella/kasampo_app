@@ -12,7 +12,7 @@ part of 'walk_session_notifier.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$WalkSessionState {
+mixin _$WalkSessionState implements DiagnosticableTreeMixin {
 
  String? get sessionId; DateTime? get startedAt; List<GeoPoint> get routePoints; double get distanceMeters; bool get isActive; bool get isPaused; int get pausedDurationSeconds; String? get error;
 /// Create a copy of WalkSessionState
@@ -22,6 +22,12 @@ mixin _$WalkSessionState {
 $WalkSessionStateCopyWith<WalkSessionState> get copyWith => _$WalkSessionStateCopyWithImpl<WalkSessionState>(this as WalkSessionState, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'WalkSessionState'))
+    ..add(DiagnosticsProperty('sessionId', sessionId))..add(DiagnosticsProperty('startedAt', startedAt))..add(DiagnosticsProperty('routePoints', routePoints))..add(DiagnosticsProperty('distanceMeters', distanceMeters))..add(DiagnosticsProperty('isActive', isActive))..add(DiagnosticsProperty('isPaused', isPaused))..add(DiagnosticsProperty('pausedDurationSeconds', pausedDurationSeconds))..add(DiagnosticsProperty('error', error));
+}
 
 @override
 bool operator ==(Object other) {
@@ -33,7 +39,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(routePoints),distanceMeters,isActive,isPaused,pausedDurationSeconds,error);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, isPaused: $isPaused, pausedDurationSeconds: $pausedDurationSeconds, error: $error)';
 }
 
@@ -212,7 +218,7 @@ return $default(_that.sessionId,_that.startedAt,_that.routePoints,_that.distance
 /// @nodoc
 
 
-class _WalkSessionState implements WalkSessionState {
+class _WalkSessionState with DiagnosticableTreeMixin implements WalkSessionState {
   const _WalkSessionState({this.sessionId, this.startedAt, final  List<GeoPoint> routePoints = const [], this.distanceMeters = 0.0, this.isActive = false, this.isPaused = false, this.pausedDurationSeconds = 0, this.error}): _routePoints = routePoints;
   
 
@@ -238,6 +244,12 @@ class _WalkSessionState implements WalkSessionState {
 _$WalkSessionStateCopyWith<_WalkSessionState> get copyWith => __$WalkSessionStateCopyWithImpl<_WalkSessionState>(this, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'WalkSessionState'))
+    ..add(DiagnosticsProperty('sessionId', sessionId))..add(DiagnosticsProperty('startedAt', startedAt))..add(DiagnosticsProperty('routePoints', routePoints))..add(DiagnosticsProperty('distanceMeters', distanceMeters))..add(DiagnosticsProperty('isActive', isActive))..add(DiagnosticsProperty('isPaused', isPaused))..add(DiagnosticsProperty('pausedDurationSeconds', pausedDurationSeconds))..add(DiagnosticsProperty('error', error));
+}
 
 @override
 bool operator ==(Object other) {
@@ -249,7 +261,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,sessionId,startedAt,const DeepCollectionEquality().hash(_routePoints),distanceMeters,isActive,isPaused,pausedDurationSeconds,error);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'WalkSessionState(sessionId: $sessionId, startedAt: $startedAt, routePoints: $routePoints, distanceMeters: $distanceMeters, isActive: $isActive, isPaused: $isPaused, pausedDurationSeconds: $pausedDurationSeconds, error: $error)';
 }
 

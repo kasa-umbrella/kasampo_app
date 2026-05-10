@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/services/firebase_storage_service.dart';
@@ -27,3 +28,6 @@ ISpotRepository spotRepository(Ref ref) => FirestoreSpotRepository();
 
 @riverpod
 IStorageService storageService(Ref ref) => FirebaseStorageService();
+
+@riverpod
+String? currentUid(Ref ref) => FirebaseAuth.instance.currentUser?.uid;
