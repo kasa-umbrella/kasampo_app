@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/snack_bar_helper.dart';
-import '../../../core/widgets/buttons/google_sign_in_button.dart';
+import '../../../core/widgets/buttons/app_button.dart';
 import '../providers/auth_providers.dart';
 
 class SignInScreen extends ConsumerWidget {
@@ -30,13 +30,26 @@ class SignInScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GoogleSignInButton(
-                    isLoading: signInState.isLoading,
-                    onPressed: signInState.isLoading
-                        ? null
-                        : () => ref
-                            .read(signInControllerProvider.notifier)
-                            .signInWithGoogle(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: AppButton(
+                      label: 'Googleでサインイン',
+                      variant: AppButtonVariant.outlined,
+                      icon: Image.asset(
+                        'assets/images/google_logo.png',
+                        width: 20,
+                        height: 20,
+                      ),
+                      foregroundColor: AppColors.textPrimary,
+                      backgroundColor: AppColors.onPrimary,
+                      borderColor: AppColors.onPrimary,
+                      isLoading: signInState.isLoading,
+                      onPressed: signInState.isLoading
+                          ? null
+                          : () => ref
+                              .read(signInControllerProvider.notifier)
+                              .signInWithGoogle(),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text(

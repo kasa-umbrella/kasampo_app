@@ -11,31 +11,54 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.variant = AppButtonVariant.primary,
     this.isLoading = false,
+    this.isExpanded = true,
+    this.icon,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.borderColor,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
   final bool isLoading;
+  final bool isExpanded;
+  final Widget? icon;
+  final Color? foregroundColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
 
   static const _shape = StadiumBorder();
   static const _textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-  static const _minSize = Size.fromHeight(52);
+  static const _minSize = Size(0, 52);
 
-  Widget get _child => isLoading
-      ? const LoadingIndicator()
-      : Text(label, style: _textStyle);
+  Widget get _child {
+    if (isLoading) return const LoadingIndicator();
+    if (icon != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon!,
+          const SizedBox(width: 8),
+          Text(label, style: _textStyle),
+        ],
+      );
+    }
+    return Text(label, style: _textStyle);
+  }
 
   VoidCallback? get _onPressed => isLoading ? null : onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return switch (variant) {
+    final button = switch (variant) {
       AppButtonVariant.primary => FilledButton(
           onPressed: _onPressed,
           style: FilledButton.styleFrom(
             minimumSize: _minSize,
             shape: _shape,
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
           ),
           child: _child,
         ),
@@ -44,8 +67,9 @@ class AppButton extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             minimumSize: _minSize,
             shape: _shape,
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary),
+            foregroundColor: foregroundColor ?? AppColors.primary,
+            backgroundColor: backgroundColor,
+            side: BorderSide(color: borderColor ?? foregroundColor ?? AppColors.primary),
           ),
           child: _child,
         ),
@@ -54,10 +78,13 @@ class AppButton extends StatelessWidget {
           style: FilledButton.styleFrom(
             minimumSize: _minSize,
             shape: _shape,
-            backgroundColor: AppColors.error,
+            backgroundColor: backgroundColor ?? AppColors.error,
+            foregroundColor: foregroundColor,
           ),
           child: _child,
         ),
     };
+    if (!isExpanded) return button;
+    return SizedBox(width: double.infinity, child: button);
   }
 }
