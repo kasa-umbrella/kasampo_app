@@ -49,19 +49,27 @@ class LocationService {
   }
 
   Stream<Position> watchPosition() {
-    final locationSettings = Platform.isIOS
-        ? AppleSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: _distanceFilter,
-            activityType: ActivityType.fitness,
-            pauseLocationUpdatesAutomatically: false,
-            allowBackgroundLocationUpdates: true,
-            showBackgroundLocationIndicator: true,
-          )
-        : AndroidSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: _distanceFilter,
-          );
+    final LocationSettings locationSettings;
+    if (Platform.isIOS) {
+      locationSettings = AppleSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: _distanceFilter,
+        activityType: ActivityType.fitness,
+        pauseLocationUpdatesAutomatically: false,
+        allowBackgroundLocationUpdates: true,
+        showBackgroundLocationIndicator: true,
+      );
+    } else if (Platform.isAndroid) {
+      locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: _distanceFilter,
+      );
+    } else {
+      locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: _distanceFilter,
+      );
+    }
     _positionStream = Geolocator.getPositionStream(
       locationSettings: locationSettings,
     ).map((pos) {

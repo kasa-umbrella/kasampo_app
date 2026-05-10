@@ -36,6 +36,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
   final List<GeoPoint> _buffer = [];
   DateTime? _pausedAt;
   ProviderSubscription<AsyncValue<Position>>? _positionSubscription;
+  Future<void> _pendingUpdate = Future.value();
 
   @override
   WalkSessionState build() {
@@ -86,7 +87,9 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     );
 
     _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
-      next.whenData(_onPositionUpdate);
+      next.whenData((pos) {
+        _pendingUpdate = _pendingUpdate.then((_) => _onPositionUpdate(pos));
+      });
     });
 
     return true;
@@ -205,6 +208,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     _positionSubscription?.close();
     _positionSubscription = null;
+    _pendingUpdate = Future.value();
 
     if (_buffer.isNotEmpty) {
       final toSend = List<GeoPoint>.from(_buffer);
