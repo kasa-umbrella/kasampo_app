@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/snack_bar_helper.dart';
 import '../../../core/widgets/map/app_tile_layer.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/providers/app_lifecycle_provider.dart';
 import '../../../core/services/location_service.dart';
 import '../../walk/providers/walk_providers.dart';
 import '../../walk/providers/walk_session_notifier.dart';
@@ -51,6 +52,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isSessionActive = ref.watch(walkSessionProvider.select((s) => s.isActive));
+    final lifecycle = ref.watch(appLifecycleProvider);
+    final shouldTrackLocation = isSessionActive || lifecycle != AppLifecycleState.paused;
+
     ref.listen<GeoPoint?>(
       walkSessionProvider.select(
         (s) => s.routePoints.isEmpty ? null : s.routePoints.last,
@@ -60,28 +65,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       },
     );
 
-    ref.listen(currentPositionProvider, (prev, next) {
-      final pos = next.asData?.value;
-      final isInvalid =
-          next.hasError ||
-          (pos != null && (!pos.latitude.isFinite || !pos.longitude.isFinite));
-      final prevPos = prev?.asData?.value;
-      final wasInvalid =
-          (prev?.hasError ?? false) ||
-          (prevPos != null &&
-              (!prevPos.latitude.isFinite || !prevPos.longitude.isFinite));
-      if (isInvalid && !wasInvalid && context.mounted) {
-        showSnackBar(context, '現在地を取得できませんでした');
-      }
-    });
+    if (shouldTrackLocation) {
+      ref.listen(currentPositionProvider, (prev, next) {
+        final pos = next.asData?.value;
+        final isInvalid =
+            next.hasError ||
+            (pos != null && (!pos.latitude.isFinite || !pos.longitude.isFinite));
+        final prevPos = prev?.asData?.value;
+        final wasInvalid =
+            (prev?.hasError ?? false) ||
+            (prevPos != null &&
+                (!prevPos.latitude.isFinite || !prevPos.longitude.isFinite));
+        if (isInvalid && !wasInvalid && context.mounted) {
+          showSnackBar(context, '現在地を取得できませんでした');
+        }
+      });
+    }
 
     final routePoints = ref.watch(
       walkSessionProvider.select((s) => s.routePoints),
     );
-    final Position? currentPosition = ref
-        .watch(currentPositionProvider)
-        .asData
-        ?.value;
+    final Position? currentPosition = shouldTrackLocation
+        ? ref.watch(currentPositionProvider).asData?.value
+        : null;
 
     return FlutterMap(
       mapController: _mapController,
