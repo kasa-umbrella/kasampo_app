@@ -12,20 +12,21 @@ class CircleIconButton extends StatelessWidget {
 
   final IconData icon;
   final double size;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final isDisabled = onPressed == null;
     return Material(
-      color: color,
+      color: isDisabled ? AppColors.divider : color,
       shape: const CircleBorder(),
-      elevation: 4,
+      elevation: isDisabled ? 0 : 4,
       shadowColor: Colors.black26,
       child: InkWell(
         customBorder: const CircleBorder(),
-        splashColor: AppColors.splashWhite,
-        highlightColor: AppColors.highlightWhite,
+        splashColor: isDisabled ? Colors.transparent : AppColors.splashWhite,
+        highlightColor: isDisabled ? Colors.transparent : AppColors.highlightWhite,
         onTap: onPressed,
         child: SizedBox(
           width: size,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/constants/app_config.dart';
 
 import '../../../core/services/location_service.dart';
@@ -35,6 +36,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
   final List<GeoPoint> _buffer = [];
   DateTime? _pausedAt;
   ProviderSubscription<AsyncValue<Position>>? _positionSubscription;
+  Future<void> _pendingUpdate = Future.value();
 
   @override
   WalkSessionState build() {
@@ -85,7 +87,9 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     );
 
     _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
-      next.whenData(_onPositionUpdate);
+      next.whenData((pos) {
+        _pendingUpdate = _pendingUpdate.then((_) => _onPositionUpdate(pos));
+      });
     });
 
     return true;
@@ -135,6 +139,10 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     if (pos.accuracy > AppConfig.maxGpsAccuracyMeters) {
       appLogger.d('[WalkSession] GPS精度不足でスキップ: accuracy=${pos.accuracy.toStringAsFixed(1)}m');
       return;
+    }
+
+    if (kDebugMode) {
+      await WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy);
     }
 
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
@@ -200,6 +208,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     _positionSubscription?.close();
     _positionSubscription = null;
+    _pendingUpdate = Future.value();
 
     if (_buffer.isNotEmpty) {
       final toSend = List<GeoPoint>.from(_buffer);

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import '../utils/app_logger.dart';
@@ -47,11 +49,29 @@ class LocationService {
   }
 
   Stream<Position> watchPosition() {
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
+    final LocationSettings locationSettings;
+    if (Platform.isIOS) {
+      locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: _distanceFilter,
-      ),
+        activityType: ActivityType.fitness,
+        pauseLocationUpdatesAutomatically: false,
+        allowBackgroundLocationUpdates: true,
+        showBackgroundLocationIndicator: true,
+      );
+    } else if (Platform.isAndroid) {
+      locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: _distanceFilter,
+      );
+    } else {
+      locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: _distanceFilter,
+      );
+    }
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
     ).map((pos) {
       appLogger.d(
         '[Location] watchPosition: '
