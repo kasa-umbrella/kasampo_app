@@ -137,6 +137,10 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       return;
     }
 
+    if (AppConfig.showLocationDebug) {
+      await WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy);
+    }
+
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
     _buffer.add(newPoint);
     if (_buffer.length >= AppConfig.routePointBufferSize) {

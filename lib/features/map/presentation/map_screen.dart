@@ -74,7 +74,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (isInvalid && !wasInvalid && context.mounted) {
         showSnackBar(context, '現在地を取得できませんでした');
       }
-      if (AppConfig.showLocationDebug && pos != null && context.mounted) {
+      final isSessionActive = ref.read(walkSessionProvider.select((s) => s.isActive));
+      if (AppConfig.showLocationDebug && isSessionActive && pos != null && context.mounted) {
         showSnackBar(
           context,
           'lat: ${pos.latitude.toStringAsFixed(6)}, '

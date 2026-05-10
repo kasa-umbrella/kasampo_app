@@ -38,4 +38,13 @@ class WalkForegroundService {
   static Future<void> stop() async {
     await FlutterForegroundTask.stopService();
   }
+
+  static Future<void> updateLocation(double lat, double lng, double accuracy) async {
+    if (!await FlutterForegroundTask.isRunningService) return;
+    await FlutterForegroundTask.updateService(
+      notificationTitle: 'かさんぽ',
+      notificationText:
+          'lat: ${lat.toStringAsFixed(6)}, lng: ${lng.toStringAsFixed(6)}, ±${accuracy.toStringAsFixed(1)}m',
+    );
+  }
 }
