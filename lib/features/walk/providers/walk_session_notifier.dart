@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/constants/app_config.dart';
 
 import '../../../core/services/location_service.dart';
@@ -137,7 +138,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       return;
     }
 
-    if (AppConfig.showLocationDebug) {
+    if (kDebugMode) {
       await WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy);
     }
 
