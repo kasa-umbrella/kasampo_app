@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_config.dart';
 import '../../../core/utils/snack_bar_helper.dart';
 import '../../../core/widgets/map/app_tile_layer.dart';
 import 'package:geolocator/geolocator.dart';
@@ -93,7 +94,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       mapController: _mapController,
       options: MapOptions(
         initialCenter: const LatLng(35.6762, 139.6503),
-        initialZoom: 14,
+        initialZoom: AppConfig.initialMapZoom,
         onMapReady: _moveToCurrentLocation,
       ),
       children: [
