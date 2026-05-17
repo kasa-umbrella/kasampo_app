@@ -144,7 +144,7 @@ class _WalkSessionOverlayState extends ConsumerState<WalkSessionOverlay> {
                         if (result != 'finish') return;
                         final current = ref.read(walkSessionProvider);
                         final resultData = WalkResultData(
-                          routePoints: current.routePoints,
+                          routeSegments: current.routeSegments,
                           distanceMeters: current.distanceMeters,
                           durationSeconds: _elapsed.inSeconds,
                         );

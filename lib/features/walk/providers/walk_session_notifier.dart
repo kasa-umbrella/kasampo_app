@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/constants/app_config.dart';
 
 import '../../../core/services/location_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/services/walk_foreground_service.dart';
 import '../../../core/utils/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,11 +23,12 @@ abstract class WalkSessionState with _$WalkSessionState {
   const factory WalkSessionState({
     String? sessionId,
     DateTime? startedAt,
-    @Default([]) List<GeoPoint> routePoints,
+    @Default([]) List<List<GeoPoint>> routeSegments,
     @Default(0.0) double distanceMeters,
     @Default(false) bool isActive,
     @Default(false) bool isPaused,
     @Default(0) int pausedDurationSeconds,
+    @Default(false) bool isSpeedExceeded,
     String? error,
   }) = _WalkSessionState;
 }
@@ -83,7 +85,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       sessionId: sessionId,
       startedAt: now,
       isActive: true,
-      routePoints: [initialPoint],
+      routeSegments: [[initialPoint]],
     );
 
     _positionSubscription = ref.listen(currentPositionProvider, (_, next) {
@@ -143,6 +145,15 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
       return;
     }
 
+    if (pos.speed >= 0 && pos.speed > AppConfig.maxWalkingSpeedMps) {
+      appLogger.d('[WalkSession] 速度超過でスキップ: speed=${pos.speed.toStringAsFixed(1)}m/s');
+      if (!state.isSpeedExceeded) {
+        state = state.copyWith(isSpeedExceeded: true);
+        NotificationService.showSpeedExceeded().ignore();
+      }
+      return;
+    }
+
     final newPoint = GeoPoint(pos.latitude, pos.longitude);
     _buffer.add(newPoint);
     if (_buffer.length >= AppConfig.routePointBufferSize) {
@@ -158,17 +169,27 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     if (!ref.mounted) return;
 
     double added = 0;
-    if (state.routePoints.isNotEmpty) {
+    final List<List<GeoPoint>> newSegments;
+    if (state.isSpeedExceeded || state.routeSegments.isEmpty) {
+      newSegments = [...state.routeSegments, [newPoint]];
+    } else {
       final d = ref
           .read(locationServiceProvider)
-          .calcDistance(state.routePoints.last, newPoint);
+          .calcDistance(state.routeSegments.last.last, newPoint);
       if (d.isFinite) added = d;
+      newSegments = [
+        ...state.routeSegments.sublist(0, state.routeSegments.length - 1),
+        [...state.routeSegments.last, newPoint],
+      ];
     }
 
+    final wasExceeded = state.isSpeedExceeded;
     state = state.copyWith(
-      routePoints: [...state.routePoints, newPoint],
+      routeSegments: newSegments,
       distanceMeters: state.distanceMeters + added,
+      isSpeedExceeded: false,
     );
+    if (wasExceeded) NotificationService.showSpeedResumed().ignore();
 
     if (kDebugMode) {
       WalkForegroundService.updateLocation(pos.latitude, pos.longitude, pos.accuracy)
@@ -182,9 +203,9 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
   }) async {
     final sessionId = state.sessionId;
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (sessionId == null || uid == null || state.routePoints.isEmpty) return;
+    if (sessionId == null || uid == null || state.routeSegments.isEmpty) return;
 
-    final location = state.routePoints.last;
+    final location = state.routeSegments.last.last;
     final ext = photo.path.contains('.') ? photo.path.split('.').last.toLowerCase() : 'jpg';
     final path = 'spot_photos/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
     final photoUrl =

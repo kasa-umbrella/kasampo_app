@@ -61,7 +61,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // セッション中は最新ルートポイントへマップを追従（rebuild は起こさない）
     ref.listen<GeoPoint?>(
       walkSessionProvider.select(
-        (s) => s.routePoints.isEmpty ? null : s.routePoints.last,
+        (s) => s.routeSegments.isEmpty ? null : s.routeSegments.last.last,
       ),
       (_, point) {
         if (point != null) _moveToPoint(point);
@@ -141,11 +141,12 @@ class _RoutePointsLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final routePoints = ref.watch(
-      walkSessionProvider.select((s) => s.routePoints),
+    final routeSegments = ref.watch(
+      walkSessionProvider.select((s) => s.routeSegments),
     );
     return CircleLayer(
-      circles: routePoints
+      circles: routeSegments
+          .expand((seg) => seg)
           .map(
             (p) => CircleMarker(
               point: LatLng(p.latitude, p.longitude),

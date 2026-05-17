@@ -10,12 +10,12 @@ import '../../../../core/widgets/map/app_tile_layer.dart';
 
 class WalkResultData {
   const WalkResultData({
-    required this.routePoints,
+    required this.routeSegments,
     required this.distanceMeters,
     required this.durationSeconds,
   });
 
-  final List<GeoPoint> routePoints;
+  final List<List<GeoPoint>> routeSegments;
   final double distanceMeters;
   final int durationSeconds;
 }
@@ -32,12 +32,15 @@ class WalkResultScreen extends StatefulWidget {
 class _WalkResultScreenState extends State<WalkResultScreen> {
   final _mapController = MapController();
 
-  late final List<LatLng> _latLngs = widget.data.routePoints
-      .map((p) => LatLng(p.latitude, p.longitude))
+  late final List<List<LatLng>> _latLngSegments = widget.data.routeSegments
+      .map((seg) => seg.map((p) => LatLng(p.latitude, p.longitude)).toList())
       .toList();
 
+  late final List<LatLng> _allLatLngs =
+      _latLngSegments.expand((seg) => seg).toList();
+
   late final LatLngBounds? _bounds =
-      _latLngs.isNotEmpty ? LatLngBounds.fromPoints(_latLngs) : null;
+      _allLatLngs.isNotEmpty ? LatLngBounds.fromPoints(_allLatLngs) : null;
 
   @override
   void dispose() {
@@ -67,8 +70,8 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _latLngs.isNotEmpty
-                  ? _latLngs.first
+              initialCenter: _allLatLngs.isNotEmpty
+                  ? _allLatLngs.first
                   : const LatLng(35.6762, 139.6503),
               initialZoom: AppConfig.initialMapZoom,
               onMapReady: () {
@@ -87,15 +90,18 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
             ),
             children: [
               const AppTileLayer(),
-              if (_latLngs.isNotEmpty)
+              if (_allLatLngs.isNotEmpty)
                 PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: _latLngs,
-                      color: AppColors.primary,
-                      strokeWidth: 4,
-                    ),
-                  ],
+                  polylines: _latLngSegments
+                      .where((seg) => seg.isNotEmpty)
+                      .map(
+                        (seg) => Polyline(
+                          points: seg,
+                          color: AppColors.primary,
+                          strokeWidth: 4,
+                        ),
+                      )
+                      .toList(),
                 ),
             ],
           ),

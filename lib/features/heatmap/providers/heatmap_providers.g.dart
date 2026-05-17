@@ -95,4 +95,4 @@ final class HeatmapPointsProvider
   }
 }
 
-String _$heatmapPointsHash() => r'9fb39daeb412600685279f0a178f731e97749054';
+String _$heatmapPointsHash() => r'f6baa9de41b444071490952a628684e64d1814ed';
