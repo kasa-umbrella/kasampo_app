@@ -42,7 +42,7 @@ final class WalkSessionNotifierProvider
 }
 
 String _$walkSessionNotifierHash() =>
-    r'7dd564a1c634e7378710231e10c53bd311ea8ea0';
+    r'264efc67569a917a78291e270c3d7eaa491241af';
 
 abstract class _$WalkSessionNotifier extends $Notifier<WalkSessionState> {
   WalkSessionState build();

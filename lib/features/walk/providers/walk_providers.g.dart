@@ -173,7 +173,7 @@ final class SpotRepositoryProvider
   }
 }
 
-String _$spotRepositoryHash() => r'ca18954588107d0d8b07638f133ffb29f88ed908';
+String _$spotRepositoryHash() => r'e5f64aeb1c9cbbfc52258d7ccc3965adf2a34fb5';
 
 @ProviderFor(storageService)
 const storageServiceProvider = StorageServiceProvider._();
