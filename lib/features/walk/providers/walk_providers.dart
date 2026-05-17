@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../core/models/spot.dart';
 import '../../../core/services/firebase_storage_service.dart';
 import '../../../core/services/i_storage_service.dart';
 import '../../../core/services/location_service.dart';
@@ -23,7 +24,7 @@ Stream<Position> currentPosition(Ref ref) {
 IWalkSessionRepository walkSessionRepository(Ref ref) =>
     FirestoreWalkSessionRepository();
 
-@riverpod
+@Riverpod(keepAlive: true)
 ISpotRepository spotRepository(Ref ref) => FirestoreSpotRepository();
 
 @riverpod
@@ -31,3 +32,10 @@ IStorageService storageService(Ref ref) => FirebaseStorageService();
 
 @riverpod
 String? currentUid(Ref ref) => FirebaseAuth.instance.currentUser?.uid;
+
+@Riverpod(keepAlive: true)
+Stream<List<Spot>> userSpots(Ref ref) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null) return const Stream.empty();
+  return ref.watch(spotRepositoryProvider).watchByUser(uid);
+}

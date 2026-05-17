@@ -22,4 +22,13 @@ class FirestoreSpotRepository implements ISpotRepository {
         .snapshots()
         .map((snap) => snap.docs.map(Spot.fromFirestore).toList());
   }
+
+  @override
+  Stream<List<Spot>> watchByUser(String userId) {
+    return _collection
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt')
+        .snapshots()
+        .map((snap) => snap.docs.map(Spot.fromFirestore).toList());
+  }
 }
