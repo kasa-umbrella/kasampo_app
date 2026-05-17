@@ -12,6 +12,9 @@ class FirestoreSpotRepository implements ISpotRepository {
   }
 
   @override
+  Future<void> delete(String spotId) => _collection.doc(spotId).delete();
+
+  @override
   Stream<List<Spot>> watchBySession(String sessionId) {
     return _collection
         .where('sessionId', isEqualTo: sessionId)

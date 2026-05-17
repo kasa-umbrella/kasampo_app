@@ -32,11 +32,20 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
   Future<void> _save() async {
     if (_photo == null) return;
     setState(() => _isSaving = true);
-    await ref.read(walkSessionProvider.notifier).addSpot(
-          photo: _photo!,
-          description: _descriptionController.text.trim(),
+    try {
+      await ref.read(walkSessionProvider.notifier).addSpot(
+            photo: _photo!,
+            description: _descriptionController.text.trim(),
+          );
+      if (mounted) context.go('/home');
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('保存に失敗しました。もう一度お試しください。')),
         );
-    if (mounted) context.go('/home');
+      }
+    }
   }
 
   @override

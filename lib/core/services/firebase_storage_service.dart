@@ -14,6 +14,11 @@ class FirebaseStorageService implements IStorageService {
     return ref.getDownloadURL();
   }
 
+  @override
+  Future<void> deletePhoto(String downloadUrl) async {
+    await _storage.refFromURL(downloadUrl).delete();
+  }
+
   Future<File> _compress(File file) async {
     final ext = file.path.contains('.') ? '.${file.path.split('.').last}' : '.jpg';
     final outPath = '${file.path}_compressed$ext';
