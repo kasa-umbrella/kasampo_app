@@ -12,7 +12,8 @@ class FirestoreHeatmapRepository {
         .get();
 
     final allPoints = snapshot.docs
-        .expand((doc) => (doc.data()['routePoints'] as List).cast<GeoPoint>())
+        .expand((doc) =>
+            ((doc.data()['routePoints'] as List?)?.cast<GeoPoint>()) ?? [])
         .toList();
 
     return allPoints

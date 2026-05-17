@@ -186,7 +186,7 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
 
     final location = state.routePoints.last;
     final ext = photo.path.contains('.') ? photo.path.split('.').last.toLowerCase() : 'jpg';
-    final path = 'spots/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path = 'spot_photos/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
     final photoUrl =
         await ref.read(storageServiceProvider).uploadPhoto(photo, path);
 

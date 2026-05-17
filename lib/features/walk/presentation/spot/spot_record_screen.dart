@@ -52,7 +52,7 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('スポットを記録')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
