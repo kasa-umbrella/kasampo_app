@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_heatmap/flutter_map_heatmap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/map/app_tile_layer.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/providers/app_lifecycle_provider.dart';
 import '../../../core/services/location_service.dart';
+import '../../heatmap/providers/heatmap_providers.dart';
 import '../../walk/providers/walk_providers.dart';
 import '../../walk/providers/walk_session_notifier.dart';
 
@@ -83,6 +85,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       });
     }
 
+    final heatmapPoints =
+        ref.watch(heatmapPointsProvider).asData?.value ?? [];
     final routePoints = ref.watch(
       walkSessionProvider.select((s) => s.routePoints),
     );
@@ -99,6 +103,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
       children: [
         const AppTileLayer(),
+        if (heatmapPoints.isNotEmpty)
+          HeatMapLayer(
+            heatMapDataSource: InMemoryHeatMapDataSource(data: heatmapPoints),
+            heatMapOptions: HeatMapOptions(
+              gradient: HeatMapOptions.defaultGradient,
+              minOpacity: 0.3,
+            ),
+          ),
         CircleLayer(
           circles: routePoints
               .map(

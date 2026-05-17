@@ -32,6 +32,7 @@ dependencies:
   # GPS・地図
   geolocator: ^13.0.1
   flutter_map: ^7.0.2
+  flutter_map_heatmap: ^0.0.5
   latlong2: ^0.9.1
 
   # 写真
