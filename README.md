@@ -110,16 +110,33 @@ firebase login
 ### Security Rules のデプロイ
 
 Firestore と Storage のセキュリティルールをクラウドに反映する。
-ルールを変更したら必ずデプロイすること。
+ルールを変更したら必ずデプロイすること。ルールを変更してもデプロイしないと Firebase Console 側に反映されず、アプリ側でエラーになる。
 
 ```bash
-# Firestore のルールをデプロイ
-firebase deploy --only firestore:rules
+# Firestore と Storage のルールをまとめてデプロイ（推奨）
+firebase deploy --only firestore:rules,storage
 
-# Firebase Storage を有効化したら storage.rules も追加してデプロイ
-# firebase.json の storage セクションを復活させてから実行
-# firebase deploy --only storage
+# 個別にデプロイする場合
+firebase deploy --only firestore:rules
+firebase deploy --only storage
 ```
+
+ルールのデプロイ対象は `firebase.json` で管理している。
+現在の設定：
+
+```json
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
+```
+
+`storage` エントリが `firebase.json` にないと `firebase deploy` を実行しても Storage のルールはデプロイされないので注意。
 
 ### Firebase App Check の有効化（本番リリース前）
 

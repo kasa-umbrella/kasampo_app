@@ -146,7 +146,7 @@ final class SpotRepositoryProvider
         argument: null,
         retry: null,
         name: r'spotRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -257,3 +257,41 @@ final class CurrentUidProvider
 }
 
 String _$currentUidHash() => r'ebce6f7fb1c31e1d35ccf1a8a0615dfdd2c6c6c4';
+
+@ProviderFor(userSpots)
+const userSpotsProvider = UserSpotsProvider._();
+
+final class UserSpotsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Spot>>,
+          List<Spot>,
+          Stream<List<Spot>>
+        >
+    with $FutureModifier<List<Spot>>, $StreamProvider<List<Spot>> {
+  const UserSpotsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'userSpotsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$userSpotsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Spot>> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Spot>> create(Ref ref) {
+    return userSpots(ref);
+  }
+}
+
+String _$userSpotsHash() => r'd9f7dc14396d5533cc6296daac812146e55c228d';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -14,10 +15,11 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.background,
     fontFamily: 'FutehodoMaruGothic',
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.surface,
-      foregroundColor: AppColors.textPrimary,
+      backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.onPrimary,
       elevation: 0,
       centerTitle: true,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(

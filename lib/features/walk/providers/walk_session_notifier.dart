@@ -185,7 +185,8 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     if (sessionId == null || uid == null || state.routePoints.isEmpty) return;
 
     final location = state.routePoints.last;
-    final path = 'spots/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final ext = photo.path.contains('.') ? photo.path.split('.').last.toLowerCase() : 'jpg';
+    final path = 'spot_photos/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
     final photoUrl =
         await ref.read(storageServiceProvider).uploadPhoto(photo, path);
 
@@ -202,6 +203,11 @@ class WalkSessionNotifier extends _$WalkSessionNotifier {
     );
 
     await ref.read(spotRepositoryProvider).create(spot);
+  }
+
+  Future<void> deleteSpot(Spot spot) async {
+    await ref.read(storageServiceProvider).deletePhoto(spot.photoUrl);
+    await ref.read(spotRepositoryProvider).delete(spot.id);
   }
 
   Future<void> finish() async {

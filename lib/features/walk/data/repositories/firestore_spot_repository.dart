@@ -12,9 +12,21 @@ class FirestoreSpotRepository implements ISpotRepository {
   }
 
   @override
+  Future<void> delete(String spotId) => _collection.doc(spotId).delete();
+
+  @override
   Stream<List<Spot>> watchBySession(String sessionId) {
     return _collection
         .where('sessionId', isEqualTo: sessionId)
+        .orderBy('createdAt')
+        .snapshots()
+        .map((snap) => snap.docs.map(Spot.fromFirestore).toList());
+  }
+
+  @override
+  Stream<List<Spot>> watchByUser(String userId) {
+    return _collection
+        .where('userId', isEqualTo: userId)
         .orderBy('createdAt')
         .snapshots()
         .map((snap) => snap.docs.map(Spot.fromFirestore).toList());

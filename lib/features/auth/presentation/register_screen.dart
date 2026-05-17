@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_providers.dart';
 import '../../../core/models/user_auth_state.dart';
 import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/inputs/app_text_form_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -52,7 +53,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppTextFormField(
                 controller: _controller,
                 decoration: const InputDecoration(
                   labelText: 'ユーザー名',

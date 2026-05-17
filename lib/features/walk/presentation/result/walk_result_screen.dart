@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_config.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/map/app_tile_layer.dart';
 
@@ -69,7 +70,7 @@ class _WalkResultScreenState extends State<WalkResultScreen> {
               initialCenter: _latLngs.isNotEmpty
                   ? _latLngs.first
                   : const LatLng(35.6762, 139.6503),
-              initialZoom: 14,
+              initialZoom: AppConfig.initialMapZoom,
               onMapReady: () {
                 final b = _bounds;
                 if (b != null &&

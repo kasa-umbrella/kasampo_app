@@ -10,8 +10,19 @@ class FirebaseStorageService implements IStorageService {
   Future<String> uploadPhoto(File file, String path) async {
     final compressed = await _compress(file);
     final ref = _storage.ref(path);
-    await ref.putFile(compressed);
+    final ext = compressed.path.split('.').last.toLowerCase();
+    final contentType = switch (ext) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
+    await ref.putFile(compressed, SettableMetadata(contentType: contentType));
     return ref.getDownloadURL();
+  }
+
+  @override
+  Future<void> deletePhoto(String downloadUrl) async {
+    await _storage.refFromURL(downloadUrl).delete();
   }
 
   Future<File> _compress(File file) async {

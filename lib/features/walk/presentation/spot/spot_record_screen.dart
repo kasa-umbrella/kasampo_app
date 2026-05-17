@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/walk_session_notifier.dart';
+import '../../../../core/utils/snack_bar_helper.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
 
 class SpotRecordScreen extends ConsumerStatefulWidget {
   const SpotRecordScreen({super.key});
@@ -32,18 +34,26 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
   Future<void> _save() async {
     if (_photo == null) return;
     setState(() => _isSaving = true);
-    await ref.read(walkSessionProvider.notifier).addSpot(
-          photo: _photo!,
-          description: _descriptionController.text.trim(),
-        );
-    if (mounted) context.go('/home');
+    try {
+      await ref.read(walkSessionProvider.notifier).addSpot(
+            photo: _photo!,
+            description: _descriptionController.text.trim(),
+          );
+      if (mounted) context.go('/home');
+    } catch (e, st) {
+      debugPrint('spot save error: $e\n$st');
+      if (mounted) {
+        setState(() => _isSaving = false);
+        showSnackBar(context, '保存に失敗しました。もう一度お試しください。');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('スポットを記録')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -59,7 +69,7 @@ class _SpotRecordScreenState extends ConsumerState<SpotRecordScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            AppTextField(
               controller: _descriptionController,
               decoration: const InputDecoration(labelText: '説明'),
               maxLines: 3,
